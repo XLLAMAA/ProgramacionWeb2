@@ -24,6 +24,7 @@ export const getAll = (req, res) => {
   res.json(resultado);
 };
 
+
 // GET /api/cursos/programacion/:id
 export const getById = (req, res) => {
   const id = parseInt(req.params.id);
@@ -107,3 +108,4 @@ export const remove = (req, res) => {
   
   res.status(204).end();
 };
+

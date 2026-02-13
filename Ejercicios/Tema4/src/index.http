@@ -1,13 +1,107 @@
-//Variables
+// Variables
 @baseUrl = http://localhost:3000
 @apiUrl = {{baseUrl}}/api
 
-//  ====================
-//      HEALTH CHECK
-//  ====================
+// ====================
+//     HEALTH CHECK
+// ====================
 
-//  Ruta raíz y health check
 GET {{baseUrl}}/health
 
-//  Info de la API
-GET {{apiUrl}}
+###
+GET {{apiUrl}}/
+
+// ====================
+//        CURSOS
+// ====================
+
+// GET all
+###
+GET {{apiUrl}}/cursos
+
+// GET by id (cambia el id)
+###
+GET {{apiUrl}}/cursos/1
+
+// POST create (ajusta campos según tu schema)
+###
+POST {{apiUrl}}/cursos
+Content-Type: application/json
+
+{
+  "titulo": "Programación Web 2",
+  "descripcion": "Tema 4 - API REST",
+  "duracionHoras": 20
+}
+
+// PUT update (reemplaza todo; ajusta campos)
+###
+PUT {{apiUrl}}/cursos/1
+Content-Type: application/json
+
+{
+  "titulo": "Programación Web 2 (Actualizado)",
+  "descripcion": "Tema 4 - API REST (update)",
+  "duracionHoras": 25
+}
+
+// PATCH partial update (solo lo que cambie)
+###
+PATCH {{apiUrl}}/cursos/1
+Content-Type: application/json
+
+{
+  "duracionHoras": 30
+}
+
+// DELETE
+###
+DELETE {{apiUrl}}/cursos/1
+
+
+// ====================
+//        USUARIOS
+// ====================
+
+// GET all
+###
+GET {{apiUrl}}/usuarios/usuarios
+
+// GET by id
+###
+GET {{apiUrl}}/usuarios/usuarios/1
+
+// POST create (ajusta campos según tu schema)
+###
+POST {{apiUrl}}/usuarios/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Jaime",
+  "email": "jaime@test.com",
+  "edad": 20
+}
+
+// PUT update
+###
+PUT {{apiUrl}}/usuarios/usuarios/1
+Content-Type: application/json
+
+{
+  "nombre": "Jaime Actualizado",
+  "email": "jaime2@test.com",
+  "edad": 21
+}
+
+// PATCH partial update
+###
+PATCH {{apiUrl}}/usuarios/usuarios/1
+Content-Type: application/json
+
+{
+  "edad": 22
+}
+
+// DELETE
+###
+DELETE {{apiUrl}}/usuarios/usuarios/1
