@@ -1,4 +1,4 @@
-// src/schemas/usuarios.schema.js
+// src/schemas/todo.schema.js
 import { z } from 'zod';
 
 export const createTodoSchema = z.object({
@@ -6,8 +6,7 @@ export const createTodoSchema = z.object({
         title: z.string()
             .min(3, 'El título debe tener al menos 3 caracteres')
             .max(100, 'El título no puede exceder 100 caracteres'),
-        lenguaje: z.enum(['javascript', 'python', 'java', 'csharp']),
-        priority: z.enum(['basico', 'intermedio', 'avanzado']),
+        priority: z.enum(['low', 'medium', 'high']),
         descripcion: z.string().optional(),
         completed: z.string().optional()
     })
