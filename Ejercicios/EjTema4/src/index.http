@@ -1,0 +1,77 @@
+@baseUrl = http://localhost:3000
+@apiUrl = {{baseUrl}}/api
+
+
+### ====================
+### HEALTH CHECK
+### ====================
+
+GET {{baseUrl}}/health
+
+
+### ====================
+### ROOT API
+### ====================
+
+GET {{apiUrl}}/
+
+
+### ====================
+### GET ALL TODOS
+### ====================
+
+GET {{apiUrl}}/todo/todos
+
+
+### GET ALL FILTRANDO POR COMPLETED
+
+GET {{apiUrl}}/todo/todos?completed=true
+
+
+### GET TODO BY ID
+
+GET {{apiUrl}}/todo/todos/1
+
+
+### ====================
+### CREATE TODO (POST)
+### ====================
+
+POST {{apiUrl}}/todo/todos
+Content-Type: application/json
+
+{
+  "title": "Estudiar Node",
+  "description": "Repasar middleware y validaciones",
+  "priority": "high",
+  "completed": false
+}
+
+
+### ====================
+### UPDATE TODO (PUT)
+### ====================
+
+PUT {{apiUrl}}/todo/todos/1
+Content-Type: application/json
+
+{
+  "title": "Estudiar Node actualizado",
+  "description": "Repasar también Zod",
+  "priority": "medium",
+  "completed": true
+}
+
+
+### ====================
+### TOGGLE COMPLETED (PATCH)
+### ====================
+
+PATCH {{apiUrl}}/todo/todos/1/toggle
+
+
+### ====================
+### DELETE TODO
+### ====================
+
+DELETE {{apiUrl}}/todo/todos/1
