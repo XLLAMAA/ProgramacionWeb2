@@ -1,0 +1,12 @@
+### Movies API tests
+
+GET http://localhost:3000/api/movies
+
+### create
+POST http://localhost:3000/api/movies
+Content-Type: application/json
+
+{
+  "title": "Inception",
+  "year": 2010
+}
