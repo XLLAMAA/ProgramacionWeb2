@@ -35,7 +35,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Middleware de upload
-const uploadMiddleware = multer({
+const uploadCover = multer({
     storage,
     fileFilter,
     limits: {
@@ -44,4 +44,4 @@ const uploadMiddleware = multer({
     }
 }).single("cover");
 
-export default uploadMiddleware;
+export default uploadCover;

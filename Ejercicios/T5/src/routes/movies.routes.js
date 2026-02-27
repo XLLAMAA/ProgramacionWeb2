@@ -14,6 +14,7 @@ import {
 
 import { validate, validateObjectId } from '../middleware/validate.middleware.js';
 import { createMovieSchema, updateMovieSchema } from '../schemas/movie.schema.js';
+import uploadCover from "../utils/handleStorage.js";
 
 const router = Router();
 
@@ -35,6 +36,6 @@ router.put("/:id", updateMovie);
 router.delete("/:id", deleteMovieById);
 
 //PATCH
-router.patch("/:id/cover", setMovieCover);
+router.patch("/:id/cover", uploadCover, setMovieCover);
 
 export default router;

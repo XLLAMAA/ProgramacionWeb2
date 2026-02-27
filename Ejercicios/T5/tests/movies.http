@@ -1,12 +1,62 @@
-### Movies API tests
+@baseUrl = http://localhost:3000
+@movieId = REEMPLAZA_POR_ID
 
-GET http://localhost:3000/api/movies
+### GET /api/movies
+GET {{baseUrl}}/api/movies
 
-### create
-POST http://localhost:3000/api/movies
+### GET /api/movies?genre=comedy
+GET {{baseUrl}}/api/movies?genre=comedy
+
+### POST /api/movies (crear)
+POST {{baseUrl}}/api/movies
 Content-Type: application/json
 
 {
-  "title": "Inception",
-  "year": 2010
+  "title": "The Matrix",
+  "director": "Wachowski",
+  "year": 1999,
+  "genre": "scifi",
+  "copies": 5
 }
+
+### GET /api/movies/:id
+GET {{baseUrl}}/api/movies/{{movieId}}
+
+### PUT /api/movies/:id (actualizar)
+PUT {{baseUrl}}/api/movies/{{movieId}}
+Content-Type: application/json
+
+{
+  "title": "The Matrix Reloaded",
+  "director": "Wachowski",
+  "year": 2003,
+  "genre": "scifi",
+  "copies": 5,
+  "availableCopies": 5
+}
+
+### POST /api/movies/:id/rent
+POST {{baseUrl}}/api/movies/{{movieId}}/rent
+
+### POST /api/movies/:id/return
+POST {{baseUrl}}/api/movies/{{movieId}}/return
+
+### GET /api/movies/stats/top
+GET {{baseUrl}}/api/movies/stats/top
+
+### PATCH /api/movies/:id/cover  (multipart field: cover)
+PATCH {{baseUrl}}/api/movies/{{movieId}}/cover
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="cover"; filename="cover.jpg"
+Content-Type: image/jpeg
+
+< ./tests/cover.jpg
+------boundary--
+
+### GET /api/movies/:id/cover
+GET {{baseUrl}}/api/movies/{{movieId}}/cover
+
+### DELETE /api/movies/:id
+DELETE {{baseUrl}}/api/movies/{{movieId}}
