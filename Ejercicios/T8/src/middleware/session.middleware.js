@@ -13,13 +13,13 @@ export const sessionMiddleware = async (req, res, next) => {
     const decoder = verifyToken(token)
 
     if (!decoder) {
-        return handleHttpError(res, "Token invalido o expirado", 403)
+        return handleHttpError(res, "Token invalido o expirado", 401)
     }
 
     const user = await User.findById(decoder._id)
 
     if (!user) {
-        return handleHttpError(res, "No se ha encontrado el usuario", 403)
+        return handleHttpError(res, "No se ha encontrado el usuario", 401)
     }
 
     req.user = user
