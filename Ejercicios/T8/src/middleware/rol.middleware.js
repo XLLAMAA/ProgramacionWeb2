@@ -7,7 +7,7 @@ export const checkRole = (roleRequerido) => {
             return handleHttpError(res, "Usuario no autenticado", 403)
         }
 
-        if (req.user.role !== roleRequerido != 'admin') {
+        if (req.user.role !== roleRequerido) {
             return handleHttpError(res, "No eres un usuario con permisos", 403)
         }
         next()
