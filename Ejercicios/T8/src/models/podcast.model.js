@@ -48,3 +48,5 @@ const podcastSchemas = new mongoose.Schema(
 
     }
 )
+
+export default mongoose.model('Podcast', podcastSchemas);

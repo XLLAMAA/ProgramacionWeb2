@@ -4,6 +4,7 @@ import {
     loginUser,
     getMe
 } from '../controllers/auth.controller.js'
+import { sessionMiddleware } from '../middleware/session.middleware.js';
 
 const router = Router();
 
@@ -14,7 +15,7 @@ router.post("/register", registerUser)
 router.post("/login", loginUser)
 
 //RUTA GET
-router.get("/me", getMe)
+router.get("/me", sessionMiddleware, getMe)
 
 export default router;
 

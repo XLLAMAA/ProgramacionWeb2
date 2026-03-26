@@ -32,10 +32,12 @@ const userSchema = new mongoose.Schema(
             default: 'user'
         },
 
-        createAt: {
+        createdAt: {
             type: Date,
             timestamps: true
         }
 
     }
 )
+
+export default mongoose.model('User', userSchema);
