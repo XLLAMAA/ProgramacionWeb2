@@ -20,8 +20,12 @@ const dbConnect = async () => {
         //Si la contrasenia esta mal o la ip no esta autorizada entra aqui
         console.error("Error de conexion con MongoDB", error.message)
 
-        //Matamos el proceso, porque sin base de datos la APi no sirve para nada
-        process.exit(1)
+        //No hacer process.exit en tests
+        if (process.env.NODE_ENV !== 'test') {
+            process.exit(1)
+        } else {
+            throw error;
+        }
     }
 
 };
