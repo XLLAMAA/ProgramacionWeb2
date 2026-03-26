@@ -31,7 +31,7 @@ export const getByIdPodCast = async (req, res) => {
 
         //Si no es ni admin ni el autor solo puede ver si esta publicado
         const isAdmin = req.user?.role === 'admin';
-        const isAuthor = podcastData.author.toString() === req.user?.id;
+        const isAuthor = podcastData.author.toString() === req.user?._id.toString();
 
         if (!podcastData.published && !isAdmin && !isAuthor) {
             return handleHttpError(res, "No puedes ver este podcast", 403);
@@ -47,12 +47,12 @@ export const getByIdPodCast = async (req, res) => {
 //POST 
 export const createPodCast = async (req, res) => {
     try {
-        const { title, descripcion } = req.body;
+        const { title, description } = req.body;
 
         const podcast = await Podcast.create({
             title,
-            descripcion,
-            author: req.user.id
+            description,
+            author: req.user._id
         });
 
         res.status(201).json({ data: podcast });
@@ -71,7 +71,7 @@ export const updatePodCast = async (req, res) => {
             return handleHttpError(res, "No se ha encontrado el podcast a actualizar", 404);
         }
 
-        if (podcast.author.toString() !== req.user.id) {
+        if (podcast.author.toString() !== req.user._id.toString()) {
             return handleHttpError(res, "No tienes permisos porque no eres el autor", 403);
         }
 

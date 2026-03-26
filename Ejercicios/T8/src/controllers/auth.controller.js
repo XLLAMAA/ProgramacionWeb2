@@ -71,7 +71,7 @@ export const loginUser = async (req, res) => {
 
 //GET
 export const getMe = async (req, res) => {
-    const user = await User.findById(req.user.id)
+    const user = await User.findById(req.user._id)
 
     if (!user) {
         return handleHttpError(res, "No se ha encontrado el usaurio", 403)
