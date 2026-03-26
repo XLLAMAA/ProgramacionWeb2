@@ -8,7 +8,7 @@ import bcryptjs from 'bcryptjs';
 
 //FUNCION PARA ENCRIPTAR LA PASS
 export const encrypt = async (clearPassword) => {
-    const hash = await bcrypt.hash(clearPassword, 10);
+    const hash = await bcryptjs.hash(clearPassword, 10);
     return hash;
 }
 
