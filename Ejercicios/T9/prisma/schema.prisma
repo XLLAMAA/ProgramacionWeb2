@@ -1,0 +1,87 @@
+// prisma/schema.prisma
+
+// Configuración del generador (cliente)
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Configuración de la base de datos
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")  // Para migraciones en Supabase
+}
+
+enum Role {
+    USER
+    LIBRARIAN 
+    ADMIN
+}
+
+enum LoanStatus {
+    ACTIVE
+    RETURNED
+    OVERDUE
+}
+
+// Aquí van tus modelos...
+
+
+model User {
+    id int @id @default(autoincrement())
+    email String @unique
+    name String
+    password String
+    role Role @default(USER) 
+
+    //Relaciones
+    loans Loan[]
+    reviews Review[]
+}
+
+model Book {
+    id int @id @default(autoincrement())
+    isbn String @unique
+    title String
+    author String
+    genre String
+    description String?
+    publishedYear Int
+    copies Int
+    available Int @default(1)
+
+    //RELACIONES
+    loans Loan[]
+    reviews Review[]
+}
+
+model Loan {
+    id int @id @default(autoincrement())
+    userId int 
+    bookId int  
+    loanDate DateTime @default(now())
+    dueDate DateTime
+    returnDate DateTime?
+    status LoanStatus @default(ACTIVE)
+
+    //RELACIONES
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, bookId])
+}
+
+model Review {
+    id int @id @default(autoincrement())
+    userId int 
+    bookId int 
+    rating int @default(1)
+    comment String?
+    createdAt DateTime @default(now())
+
+    //RELACIONES
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, bookId])
+}
