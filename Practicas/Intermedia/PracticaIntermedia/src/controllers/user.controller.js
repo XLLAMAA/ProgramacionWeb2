@@ -14,7 +14,6 @@ import {
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { validateHeaderName } from "http";
 
 //Registro de usuario POST
 export const register = async (req, res, next) => {
@@ -35,18 +34,18 @@ export const register = async (req, res, next) => {
         const hashPassword = await bcryptjs.hash(password, 10)
 
         //Creo el user en la BD
-        const user = await user.create({
+        const user = await User.create({
             email,
             password: hashPassword,
-            codigoVerificacion,
+            verificationCode: codigoVerificacion,
             verificationAttempts: 3,
             status: "pending",
             role: "admin",
             company: null
         })
 
-        //Genero tocken JWT
-        const tocken = generateTockens(user._id)
+        //Genero token JWT
+        const tokens = generateTokens(user._id)
 
         //Respuesta de que ha salido todo correcto
         res.status(201).json({
@@ -57,8 +56,8 @@ export const register = async (req, res, next) => {
                 role: user.role,
                 status: user.status
             },
-            accessTocken: tocken.accessTocken,
-            refreshTokenSchema: tocken.refreshTokenSchema
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken
         })
 
 
@@ -86,21 +85,21 @@ export const login = async (req, res, next) => {
             throw AppError.unauthorized("La contraseña no es correcta")
         }
 
-        //genero tocken con jwt
-        const tocken = generateTockens(user._id)
+        //genero token con jwt
+        const tokens = generateTokens(user._id)
 
         //Respuesta todo correcto
-        res.status(201).json({
-            message: "EL usaurio ha iniciado sesion de manera exitosa",
+        res.status(200).json({
+            message: "El usuario ha iniciado sesion de manera exitosa",
             user: {
-                user: user._id,
+                id: user._id,
                 email: user.email,
                 role: user.role,
                 status: user.status
             },
 
-            accesTocken: tocken.accesTocken,
-            refreshTokenSchema: tocken.refreshTokenSchema,
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
         })
 
     } catch (e) {
@@ -113,7 +112,7 @@ export const login = async (req, res, next) => {
 export const validateEmail = async (req, res, next) => {
     try {
 
-        const { email } = validatorEmail.parse(req.body)
+        const { code } = validatorEmail.parse(req.body)
 
         //verifico el user
         const user = await User.findById(req.user.id)
@@ -128,7 +127,7 @@ export const validateEmail = async (req, res, next) => {
         }
 
         //Verifico que el codigo sea correcto
-        if (user.verificationAttempts !== code) {
+        if (user.verificationCode !== code) {
             user.verificationAttempts -= 1
             await user.save()
             throw AppError.badRequest("Codigo incorrecto")
@@ -400,6 +399,93 @@ export const deleteUser = async (req, res, next) => {
                 message: "Usuario eliminado (fisico)"
             })
         }
+
+    } catch (e) {
+        next(e)
+    }
+}
+
+//Cambio de password PUT
+export const cambioPassword = async (req, res, next) => {
+    try {
+
+        const { password, newPassword } = cambioContrasena.parse(req.body)
+
+        const user = await User.findById(req.user.id)
+
+        if (!user) {
+            throw AppError.notFound("Usuario no encontrado")
+        }
+
+        //Verifico la pass
+        const verifyPass = await bcryptjs.compare(password, user.password)
+
+        if (!verifyPass) {
+            throw AppError.unauthorized("Contraseña acutal incorrecta")
+        }
+
+        //Hasheo la nueva pass
+        const hashPass = await bcryptjs.hash(newPassword)
+
+        //Actualizo la pass del ueer
+        user.password = hashPass
+        await user.save()
+
+        res.status(201).json({ message: "Se ha cambiado la contraseña de forma correcta" })
+
+    } catch (e) {
+        next(e)
+    }
+}
+
+//Invitar compañeros POST
+export const inviteUser = async (req, res, next) => {
+    try {
+
+        const user = await User.findById(req.user.id)
+
+        if (!user) {
+            throw AppError.notFound("No se ha encontrado el usuario")
+        }
+
+        if (!user.role !== "admin") {
+            throw AppError.unauthorized("Solo se puede invitar si eres admin")
+        }
+
+        const { email, name, lastName } = inviteUserSchema.parse(req.body)
+
+        const userExist = await User.findOne({ email, delted: false })
+        if (!userExist) {
+            throw AppError.notFound("Usuario no encontrado")
+        } else {
+            throw AppError.conflict("Usuario ya registrado")
+        }
+
+        const tempPassword = crypto.randomBytes(8).toString("hex");
+        const hashedPassword = await bcryptjs.hash(tempPassword, 10);
+
+        //Creo usuario invitado
+        const newUser = await User.create({
+            email,
+            password: hashedPassword,
+            name,
+            lastName,
+            company: user.company,
+            role: "guest",
+            status: "verified",
+            verificationAttempts: 0,
+        });
+
+        res.status(201).json({
+            message: "Usuario invitado exitosamente",
+            user: {
+                id: newUser._id,
+                email: newUser.email,
+                name: newUser.name,
+                role: newUser.role,
+            },
+            tempPassword,
+        });
 
     } catch (e) {
         next(e)
