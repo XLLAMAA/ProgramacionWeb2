@@ -16,6 +16,7 @@ const CompanySchema = new mongoose.Schema({
     cif: {
         type: String,
         required: true,
+        unique: true,
     },
 
     address: {
@@ -28,7 +29,7 @@ const CompanySchema = new mongoose.Schema({
 
     logo: {
         type: String,
-        required: true
+        default: null,
     },
 
     isFreelance: {
@@ -43,4 +44,8 @@ const CompanySchema = new mongoose.Schema({
 
 }, { timestamps: true });   //Crea mongoose los campos de createdAt y updateAt
 
-export default mongoose.model('Company', CompanySchema);
+//Indices
+CompanySchema.index({ cif: 1 }, { unique: true });
+CompanySchema.index({ owner: 1 });
+
+export default mongoose.model("Company", CompanySchema);
