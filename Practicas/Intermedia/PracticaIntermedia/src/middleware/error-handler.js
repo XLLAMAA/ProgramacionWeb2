@@ -3,7 +3,7 @@
     --routesNotFound es para cuando el usuario trate de entrar a una ruta que no exista
 */
 
-import AppError from "..utils/AppError.js";
+import AppError from "../utils/AppError.js";
 
 export const errorHandler = (err, req, res, next) => {
     console.error("Error:", err)
@@ -69,7 +69,7 @@ export const errorHandler = (err, req, res, next) => {
 
 }
 
-export const rotesNotFound = (req, res, next) => {
+export const notFoundHandler = (req, res, next) => {
     const error = new AppError(
         `Ruta no encontrada: ${req.originalUrl}`, 404
     )

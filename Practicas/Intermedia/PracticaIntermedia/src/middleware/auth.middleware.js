@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 import config from "../config/index.js";
 import AppError from "../utils/AppError.js";
 
-export const authMiddelware = (req, res, next) => {
+export const authMiddleware = (req, res, next) => {
     try {
 
         //Onbtengo token de la cabecera 
@@ -29,17 +29,19 @@ export const authMiddelware = (req, res, next) => {
             id: decoded.id,
         };
 
+        next()
+
     } catch (e) {
 
         //Si el token es invalido
-        if (error.name === "JsonWebTokenError") {
+        if (e.name === "JsonWebTokenError") {
             return next(AppError.unauthorized("Token invalido"));
         }
         //Token expirado
-        if (error.name === "TokenExpiredError") {
+        if (e.name === "TokenExpiredError") {
             return next(AppError.unauthorized("Token expirado"));
         }
 
-        next(e)
+        next(error);
     }
 }
