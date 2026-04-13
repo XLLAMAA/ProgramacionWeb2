@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { authMiddleware } from "./auth.middleware.js";
-import { requireRole } from "./role.middleware.js";
-import { validate } from "./validate.js";
-import { upload } from "./upload.js";
+import { authMiddleware } from "../middleware/auth.middleware.js";
+import { requireRole } from "../middleware/role.middleware.js";
+import { validate } from "../middleware/validate.js";
+import { upload } from "../middleware/upload.js";
 
-// Importar validadores
+//Importo validadores
 import {
     registerSchema,
     loginSchema,
