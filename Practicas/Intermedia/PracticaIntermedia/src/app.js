@@ -1,6 +1,7 @@
 import express from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import mongoSanitize from "express-mongo-sanitize";
 
 // Importar config
 import config from "./config/index.js";
@@ -48,5 +49,6 @@ app.use(notFoundHandler);
 
 // Manejo global de errores (DEBE ser el ultimo middleware)
 app.use(errorHandler);
+app.use(mongoSanitize())
 
 export default app;
