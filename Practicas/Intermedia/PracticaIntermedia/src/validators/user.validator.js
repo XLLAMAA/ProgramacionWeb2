@@ -49,24 +49,7 @@ export const personaDataInfo = z.object({
 
 });
 
-//Datos compañia
-export const personalCompany = z.object({
-    name:
-        z.string({ requiredError: "Introduce el nombre de la empresa" })
-            .min(1, "Nombre no puede estar vacío")
-            .transform(val => val.trim()),
-    cif:
-        z.string({ requiredError: "Introduce el CIF" })
-            .min(1, "CIF no puede estar vacío")
-            .transform(val => val.toUpperCase().trim()),
-    isFreelance:
-        z.boolean({ requiredError: "Introduce si eres freelance" })
-            .default(false),
-
-    address: addressSchema,
-});
-
-//Doreccion
+//Direccion
 export const addressSchema = z.object({
     street: z
         .string({ requiredError: "Introduce la calle" })
@@ -88,6 +71,23 @@ export const addressSchema = z.object({
         .string({ requiredError: "Introduce la provincia" })
         .min(1, "La provincia no puede estar vacía")
         .transform(val => val.trim()),
+});
+
+//Datos compañia
+export const personalCompany = z.object({
+    name:
+        z.string({ requiredError: "Introduce el nombre de la empresa" })
+            .min(1, "Nombre no puede estar vacío")
+            .transform(val => val.trim()),
+    cif:
+        z.string({ requiredError: "Introduce el CIF" })
+            .min(1, "CIF no puede estar vacío")
+            .transform(val => val.toUpperCase().trim()),
+    isFreelance:
+        z.boolean({ requiredError: "Introduce si eres freelance" })
+            .default(false),
+
+    address: addressSchema,
 });
 
 //Cambio de contraseña
