@@ -14,6 +14,7 @@ import {
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { generateTokens } from "../utils/tokenGenerator.js";
 
 //Registro de usuario POST
 export const register = async (req, res, next) => {
@@ -166,7 +167,7 @@ export const updatePersonalData = async (req, res, next) => {
         //Actualizo los datos personales del user
         const user = await User.findByIdAndUpdate(
             req.user.id,
-            { name: lastaName, nif },
+            { name: lastName, nif },
             { new: true, runValidators: true }
         )
 
@@ -265,7 +266,7 @@ export const uploadLogo = async (req, res, next) => {
     try {
 
         //Obtengo el user con populate de compañia
-        const userr = await user.findById(req.user.id).populate("company")
+        const userr = await User.findById(req.user.id).populate("company")
         if (!user || !user.company) {
             throw AppError.badRequest("Usuario sin comañia asiganda")
         }
@@ -389,7 +390,7 @@ export const deleteUser = async (req, res, next) => {
 
         //En funcion de si el soft es true  o false se hace boorrado logico (reversible) o fisco (irreversibel)
         if (soft === "true") {
-            await User.findByIdAndUpdate(req.user.id, { delted: true })
+            await User.findByIdAndUpdate(req.user.id, { deleted: true })
             res.status(201).json({
                 message: "Usuario eliminado (logico)",
             })
