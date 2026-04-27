@@ -9,9 +9,9 @@ import {
     registerSchema,
     loginSchema,
     validatorEmail,
-    personalDataInfo,
+    personaDataInfo,
     personalCompany,
-    cambioContrasena,
+    cambioContraseña,
     refreshTokenSchema,
     inviteUserSchema,
 } from "../validators/user.validator.js";
@@ -22,13 +22,13 @@ import {
     login,
     validateEmail,
     updatePersonalData,
-    updateCompany,
+    updateCompanyData,
     uploadLogo,
     getUser,
     refreshToken,
     logout,
     deleteUser,
-    changePassword,
+    cambioPassword,
     inviteUser,
 } from "../controllers/user.controller.js";
 
@@ -52,10 +52,10 @@ router.post("/refresh", validate(refreshTokenSchema), refreshToken);
 router.put("/validation", authMiddleware, validate(validatorEmail), validateEmail);
 
 // PUT /api/user - Actualizar datos personales (nombre, apellido, NIF)
-router.put("/", authMiddleware, validate(personalDataInfo), updatePersonalData);
+router.put("/", authMiddleware, validate(personaDataInfo), updatePersonalData);
 
 // PATCH /api/user/company - Crear o unirse a una empresa
-router.patch("/company", authMiddleware, validate(personalCompany), updateCompany);
+router.patch("/company", authMiddleware, validate(personalCompany), updateCompanyData);
 
 // PATCH /api/user/logo - Subir logo de empresa
 router.patch("/logo", authMiddleware, upload.single("logo"), uploadLogo);
@@ -67,7 +67,7 @@ router.get("/", authMiddleware, getUser);
 router.post("/logout", authMiddleware, logout);
 
 // PUT /api/user/password - Cambiar contraseña
-router.put("/password", authMiddleware, validate(cambioContrasena), changePassword);
+router.put("/password", authMiddleware, validate(cambioContraseña), cambioPassword);
 
 // DELETE /api/user - Eliminar cuenta de usuario
 router.delete("/", authMiddleware, deleteUser);
