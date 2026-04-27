@@ -7,7 +7,7 @@ import {
     validatorEmail,
     personaDataInfo,
     personalCompany,
-    cambioContrasena,
+    cambioContraseña,
     refreshTokenSchema,
     inviteUserSchema
 } from "../validators/user.validator.js";
@@ -15,6 +15,7 @@ import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { generateTokens } from "../utils/tokenGenerator.js";
+import notificationService from "../services/notification.service.js";
 
 //Registro de usuario POST
 export const register = async (req, res, next) => {
@@ -43,6 +44,12 @@ export const register = async (req, res, next) => {
             status: "pending",
             role: "admin",
             company: null
+        })
+
+        notificationService.emit('user:registered', {
+            email: user.email,
+            userId: user._id,
+            verificationCode: codigoVerificacion
         })
 
         //Genero token JWT
@@ -140,6 +147,11 @@ export const validateEmail = async (req, res, next) => {
         user.verificationAttempts = null
         await user.save()
 
+        notificationService.emit('user:verified', {
+            email: user.email,
+            userId: user._id
+        })
+
         res.json({ message: "Email verificado exitosamente" })
 
     } catch (e) {
@@ -154,7 +166,7 @@ export const updatePersonalData = async (req, res, next) => {
         const { name, lastName, nif } = personaDataInfo.parse(req.body)
 
         //verifico el nif
-        const verifyNif = await user.findOne({
+        const verifyNif = await User.findOne({
             nif,
             _id: { $ne: req.user.id },
             deleted: false
@@ -167,7 +179,7 @@ export const updatePersonalData = async (req, res, next) => {
         //Actualizo los datos personales del user
         const user = await User.findByIdAndUpdate(
             req.user.id,
-            { name: lastName, nif },
+            { name, lastName, nif },
             { new: true, runValidators: true }
         )
 
@@ -211,7 +223,7 @@ export const updateCompanyData = async (req, res, next) => {
 
             if (!company) {
                 //Creo la compañia freelance
-                company = Company.create({
+                company = await Company.create({
                     owner: user._id,
                     name: user.name,
                     cif: user.nif,
@@ -266,7 +278,7 @@ export const uploadLogo = async (req, res, next) => {
     try {
 
         //Obtengo el user con populate de compañia
-        const userr = await User.findById(req.user.id).populate("company")
+        const user = await User.findById(req.user.id).populate("company")
         if (!user || !user.company) {
             throw AppError.badRequest("Usuario sin comañia asiganda")
         }
@@ -342,7 +354,7 @@ export const refreshToken = async (req, res, next) => {
         //Verificar y decodificar el refresh token
         const decoded = jwt.verify(
             refreshToken,
-            process.env.JWT_REFRESH_SECRET
+            config.jwt.refresh.secret
         );
 
         //Verificar que el usuario exista
@@ -394,6 +406,11 @@ export const deleteUser = async (req, res, next) => {
             res.status(201).json({
                 message: "Usuario eliminado (logico)",
             })
+
+            notificationService.emit('user:deleted', {
+                userId: req.user.id
+            })
+
         } else {
             await User.findByIdAndDelete(req.user.id)
             res.status(201).json({
@@ -410,7 +427,7 @@ export const deleteUser = async (req, res, next) => {
 export const cambioPassword = async (req, res, next) => {
     try {
 
-        const { password, newPassword } = cambioContrasena.parse(req.body)
+        const { currentPassword, newPassword } = cambioContrasena.parse(req.body)
 
         const user = await User.findById(req.user.id)
 
@@ -419,14 +436,14 @@ export const cambioPassword = async (req, res, next) => {
         }
 
         //Verifico la pass
-        const verifyPass = await bcryptjs.compare(password, user.password)
+        const verifyPass = await bcryptjs.compare(currentPassword, user.password)
 
         if (!verifyPass) {
             throw AppError.unauthorized("Contraseña acutal incorrecta")
         }
 
         //Hasheo la nueva pass
-        const hashPass = await bcryptjs.hash(newPassword)
+        const hashPass = await bcryptjs.hash(newPassword, 10)
 
         //Actualizo la pass del ueer
         user.password = hashPass
@@ -449,16 +466,14 @@ export const inviteUser = async (req, res, next) => {
             throw AppError.notFound("No se ha encontrado el usuario")
         }
 
-        if (!user.role !== "admin") {
+        if (user.role !== "admin") {
             throw AppError.unauthorized("Solo se puede invitar si eres admin")
         }
 
         const { email, name, lastName } = inviteUserSchema.parse(req.body)
 
-        const userExist = await User.findOne({ email, delted: false })
-        if (!userExist) {
-            throw AppError.notFound("Usuario no encontrado")
-        } else {
+        const userExist = await User.findOne({ email, deleted: false })
+        if (userExist) {
             throw AppError.conflict("Usuario ya registrado")
         }
 
@@ -476,6 +491,13 @@ export const inviteUser = async (req, res, next) => {
             status: "verified",
             verificationAttempts: 0,
         });
+
+        notificationService.emit('user:invited', {
+            email: newUser.email,
+            userId: newUser._id,
+            companyId: newUser.company,
+            tempPassword
+        })
 
         res.status(201).json({
             message: "Usuario invitado exitosamente",
