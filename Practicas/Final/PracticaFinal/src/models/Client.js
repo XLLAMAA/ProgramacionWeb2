@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { fillAndStroke } from 'pdfkit';
 
 const clientSchema = new mongoose.Schema({
 
@@ -45,7 +44,7 @@ const clientSchema = new mongoose.Schema({
         province: { type: String, required: true },
     },
 
-    delted: {
+    deleted: {
         type: Boolean,
         default: false
     }
