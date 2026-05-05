@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { validateRequest } from '../middleware/validate.js';
-import { auth } from '../middleware/auth.js';
+import { auth } from '../middleware/auth.middleware.js';
 import { createProjectSchema, updateProjectSchema } from '../validators/project.validator.js';
 
 //Controller 
@@ -24,10 +24,10 @@ router.get('/:id', getProjectById)
 router.get('/archived', getArchivedProjects)
 
 //Rutas post
-router.post('/', validateRequest(createProjectSchema), createProject)
+router.post('/', validate(createProjectSchema), createProject)
 
 //Rutas put
-router.put('/:id', validateRequest(updateProjectSchema), updateProject)
+router.put('/:id', validate(updateProjectSchema), updateProject)
 
 //Rutas patch 
 router.patch('/:id/restore', restoreProject)
