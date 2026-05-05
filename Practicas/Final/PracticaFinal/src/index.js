@@ -6,9 +6,12 @@ import config from "./config/index.js";
 // Importar app
 import app from "./app.js";
 
-// Importar modelos (para validar que esten correctos)
+// Importar modelos (para validar que estén correctos)
 import User from "./models/User.js";
 import Company from "./models/Company.js";
+import Client from "./models/Client.js";
+import Project from "./models/Project.js";
+import DeliveryNote from "./models/DeliveryNote.js";
 
 // Importar servicio de notificaciones
 import "./services/notification.service.js";
@@ -28,6 +31,9 @@ const startServer = async () => {
         console.log("📦 Modelos de datos registrados:");
         console.log("  - User");
         console.log("  - Company");
+        console.log("  - Client");
+        console.log("  - Project");
+        console.log("  - DeliveryNote");
 
         // Iniciar servidor
         const server = app.listen(config.port, () => {
@@ -39,7 +45,27 @@ const startServer = async () => {
             }
         });
 
-        // Manejo de errores de conexion
+        // Graceful shutdown - SIGTERM (Docker, PM2)
+        process.on("SIGTERM", () => {
+            console.log("📛 Señal SIGTERM recibida, cerrando servidor...");
+            server.close(async () => {
+                await mongoose.connection.close();
+                console.log("✅ Servidor y conexión a BD cerrados");
+                process.exit(0);
+            });
+        });
+
+        // Graceful shutdown - SIGINT (Ctrl+C)
+        process.on("SIGINT", () => {
+            console.log("📛 Señal SIGINT recibida, cerrando servidor...");
+            server.close(async () => {
+                await mongoose.connection.close();
+                console.log("✅ Servidor y conexión a BD cerrados");
+                process.exit(0);
+            });
+        });
+
+        // Errores no capturados
         process.on("uncaughtException", (error) => {
             console.error("❌ Error no capturado:", error.message);
             process.exit(1);

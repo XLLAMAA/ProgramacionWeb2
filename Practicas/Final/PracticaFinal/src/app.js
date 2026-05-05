@@ -9,8 +9,8 @@ import config from "./config/index.js";
 // Importar middlewares
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 
-// Importar rutas
-import userRoutes from "./routes/user.routes.js";
+// Importar router central
+import routes from "./routes/index.js";
 
 // ========================================
 // CONFIGURACION DE EXPRESS
@@ -26,6 +26,9 @@ app.use(helmet());
 // Parser JSON
 app.use(express.json());
 
+// Sanitizar datos de MongoDB
+app.use(mongoSanitize());
+
 // Rate limiting
 const limiter = rateLimit({
     windowMs: config.rateLimit.windowMs,
@@ -39,8 +42,8 @@ app.use("/uploads", express.static("uploads"));
 
 // ========== RUTAS ==========
 
-// Ruta de usuario
-app.use("/api", userRoutes);
+// Router central con todos los endpoints
+app.use("/api", routes);
 
 // ========== MIDDLEWARES DE ERROR ==========
 
@@ -49,6 +52,5 @@ app.use(notFoundHandler);
 
 // Manejo global de errores (DEBE ser el ultimo middleware)
 app.use(errorHandler);
-app.use(mongoSanitize())
 
 export default app;
