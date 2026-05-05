@@ -24,10 +24,10 @@ router.get('/:id', getProjectById)
 router.get('/archived', getArchivedProjects)
 
 //Rutas post
-router.post('/', validate(createProjectSchema), createProject)
+router.post('/', validateRequest(createProjectSchema), createProject)
 
 //Rutas put
-router.put('/:id', validate(updateProjectSchema), updateProject)
+router.put('/:id', validateRequest(updateProjectSchema), updateProject)
 
 //Rutas patch 
 router.patch('/:id/restore', restoreProject)

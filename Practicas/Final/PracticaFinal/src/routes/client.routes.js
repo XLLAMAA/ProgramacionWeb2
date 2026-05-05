@@ -24,10 +24,10 @@ router.get('/:id', getClientById)
 router.get('/archived', getArchivedClients)
 
 //Rutas post
-router.post('/', validate(createClientSchema), createClient)
+router.post('/', validateRequest(createClientSchema), createClient)
 
 //Rutas put
-router.put('/:id', validate(updateClientSchema), updateClient)
+router.put('/:id', validateRequest(updateClientSchema), updateClient)
 
 //Rutas patch 
 router.patch('/:id/restore', restoreClient)
