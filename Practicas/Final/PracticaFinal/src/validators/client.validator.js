@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const clientValidator = {
+export const createClientSchema = {
     create: z.object({
         body: z.object({
             name: z.string().min(1, "El nombre es requerido"),
@@ -16,7 +16,9 @@ export const clientValidator = {
             })
         })
     }),
+}
 
+export const updateClientSchema = {
     //Todo lo que se actualize es opcional
     update: z.object({
         body: z.object({
@@ -30,7 +32,7 @@ export const clientValidator = {
                 postal: z.string().optional(),
                 city: z.string().optional(),
                 province: z.string().optional()
-            }).opcional()   //Toda la direccion es opcional
+            }).optional()   //Toda la direccion es opcional
         })
     })
 }
