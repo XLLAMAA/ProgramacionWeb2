@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { validateRequest } from '../middleware/validate.js';
-import { auth } from '../middleware/auth.middleware.js';
+import { validate } from '../middleware/validate.js';
+import { authMiddleware } from '../middleware/auth.middleware.js';
 import { createDeliverySchema, updateDeliverySchema } from '../validators/deliverynote.validator.js';
 import { upload } from '../middleware/upload.js';
 
@@ -19,7 +19,7 @@ import {
 
 const router = Router()
 
-router.use(auth)
+router.use(authMiddleware)
 
 //Rutas get
 router.get('/', getDeliveryNotes)
@@ -27,11 +27,11 @@ router.get('/:id', getDeliveryNoteById)
 router.get('/archived', getArchivedDeliveryNotes)
 
 //Rutas post
-router.post('/', validateRequest(createDeliverySchema), createDeliveryNote)
+router.post('/', validate(createDeliverySchema), createDeliveryNote)
 router.post('/:id/sign', upload.single('signature'), signDeliveryNote)
 
 //Rutas put
-router.put('/:id', validateRequest(updateDeliverySchema), updateDeliveryNote)
+router.put('/:id', validate(updateDeliverySchema), updateDeliveryNote)
 
 //Rutas patch 
 router.patch('/:id/restore', restoreDeliveryNote)

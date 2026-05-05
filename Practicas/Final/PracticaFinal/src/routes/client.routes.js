@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { validateRequest } from '../middleware/validate.js';
-import { auth } from '../middleware/auth.middleware.js';
+import { validate } from '../middleware/validate.js';
+import { authMiddleware } from '../middleware/auth.middleware.js';
 import { createClientSchema, updateClientSchema } from '../validators/client.validator.js';
 
 //controller
@@ -16,7 +16,7 @@ import {
 
 const router = Router()
 
-router.use(auth)
+router.use(authMiddleware)
 
 //Rutas get
 router.get('/', getClientes)
@@ -24,10 +24,10 @@ router.get('/:id', getClientById)
 router.get('/archived', getArchivedClients)
 
 //Rutas post
-router.post('/', validateRequest(createClientSchema), createClient)
+router.post('/', validate(createClientSchema), createClient)
 
 //Rutas put
-router.put('/:id', validateRequest(updateClientSchema), updateClient)
+router.put('/:id', validate(updateClientSchema), updateClient)
 
 //Rutas patch 
 router.patch('/:id/restore', restoreClient)
