@@ -3,8 +3,14 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import mongoSanitize from "express-mongo-sanitize";
 
+
+
 //Importar config
 import config from "./config/index.js";
+
+//Importar swagger
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpecs from './config/swagger.js'
 
 //Importar middlewares
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
@@ -45,6 +51,9 @@ app.use("/uploads", express.static("uploads"));
 
 // Health check - Acceso público
 app.use("/health", healthRoutes);
+
+//Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Router central con todos los endpoints
 app.use("/api", routes);
