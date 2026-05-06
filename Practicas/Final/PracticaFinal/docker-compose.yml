@@ -1,1 +1,60 @@
+version: '3.9'
 
+services:
+  # ==================== MongoDB ====================
+  mongodb:
+    image: mongo:7.0-alpine
+    container_name: practicaweb2-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: practica_web_2
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: [ 'CMD', 'mongosh', '--eval', 'db.adminCommand("ping")' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - practicaweb2-network
+
+  # ==================== Practica Web 2 API ====================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: practicaweb2-api
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://admin:password123@mongodb:27017/practica_web_2?authSource=admin
+      PORT: 3000
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-PonAquiUnaCadenaDeTextoMuyLargaYAleatoria123!}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-OtraCadenaDeTextoMuyLargaYAleatoria456!}
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
+      LOG_LEVEL: info
+    healthcheck:
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:3000/health' ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - practicaweb2-network
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+
+networks:
+  practicaweb2-network:
+    driver: bridge
