@@ -1,6 +1,7 @@
 import pino from 'pino';
 import axios from 'axios';
 import config from '../config/index.js';
+import { IncomingWebhook } from '@slack/webhook';
 
 //Informacion de los logs, colorres y fecha
 const logger = pino({

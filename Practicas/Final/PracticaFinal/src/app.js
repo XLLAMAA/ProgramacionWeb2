@@ -10,7 +10,7 @@ import config from "./config/index.js";
 
 //Importar swagger
 import swaggerUi from 'swagger-ui-express';
-import swaggerSpecs from './config/swagger.js'
+import { swaggerSpec } from './config/swagger.js'
 
 //Importar middlewares
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
@@ -53,7 +53,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/health", healthRoutes);
 
 //Swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Router central con todos los endpoints
 app.use("/api", routes);

@@ -13,6 +13,6 @@ router.use("/client", clientRoutes)
 //Ruta projject
 router.use("/project", projectRoutes)
 //Ruta delivery
-router.use("/delivery", deliveryRoutes)
+router.use("/deliverynote", deliveryRoutes)
 
 export default router;

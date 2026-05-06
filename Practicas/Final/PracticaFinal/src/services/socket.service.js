@@ -1,6 +1,7 @@
 import { Server } from 'socket.io'
 import jwt from 'jsonwebtoken'
 import config from '../config/index.js'
+import { IncomingWebhook } from '@slack/webhook';
 
 
 let io = null;
@@ -21,7 +22,7 @@ export const initializeSocket = (server) => {
             const token = socket.handshake.auth.token;
             if (!token) return next(new Error('Token no proporcionado'));
 
-            const decoded = jwt.verify(token, config.jwt.secret);  //verifico jwt
+            const decoded = jwt.verify(token, config.jwt.access.secret);  //verifico jwt
             socket.user = decoded; // { id, company }
             next();
         } catch (error) {
