@@ -3,14 +3,15 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import mongoSanitize from "express-mongo-sanitize";
 
-// Importar config
+//Importar config
 import config from "./config/index.js";
 
-// Importar middlewares
+//Importar middlewares
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 
-// Importar router central
+//Importar rutas
 import routes from "./routes/index.js";
+import healthRoutes from "./routes/health.routes.js";
 
 // ========================================
 // CONFIGURACION DE EXPRESS
@@ -41,6 +42,9 @@ app.use(limiter);
 app.use("/uploads", express.static("uploads"));
 
 // ========== RUTAS ==========
+
+// Health check - Acceso público
+app.use("/health", healthRoutes);
 
 // Router central con todos los endpoints
 app.use("/api", routes);
