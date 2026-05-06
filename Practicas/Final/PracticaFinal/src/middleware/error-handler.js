@@ -4,6 +4,7 @@
 */
 
 import AppError from "../utils/AppError.js";
+import { sendSlackError, logError } from "../services/logger.service.js";
 
 export const errorHandler = (err, req, res, next) => {
     console.error("Error:", err)
@@ -52,6 +53,9 @@ export const errorHandler = (err, req, res, next) => {
 
     //CASO 4: Error de Mongoose (BD)
     if (err.name === "MongoError" || err.name === "MongoServerError") {
+        // Enviar a Slack (fire and forget)
+        sendSlackError(500, req.method, req.path, "Error en la base de datos", err.stack).catch(() => { });
+
         return res.status(500).json({
             success: false,
             message: "Error en la base de datos",
@@ -60,6 +64,9 @@ export const errorHandler = (err, req, res, next) => {
     }
 
     //CASO 5: Error desconocido / generico
+    // Enviar a Slack (fire and forget)
+    sendSlackError(500, req.method, req.path, err.message, err.stack).catch(() => { });
+
     return res.status(500).json({
         success: false,
         message: "Error interno del servidor",
