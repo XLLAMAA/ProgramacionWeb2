@@ -4,7 +4,7 @@ import AppError from "../utils/AppError.js";
 
 
 const upload = multer({
-    dest: config.multer.uploadDir,
+    storage: multer.memoryStorage(),
     fileFilter: (req, file, cb) => {
         //Valido los tipos de los archivos que suben
         if (!config.multer.allowedMimeTypes.includes(file.mimetype)) {

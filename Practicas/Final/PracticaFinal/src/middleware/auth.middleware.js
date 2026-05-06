@@ -6,8 +6,9 @@
 import jwt from "jsonwebtoken";
 import config from "../config/index.js";
 import AppError from "../utils/AppError.js";
+import User from "../models/User.js";
 
-export const authMiddleware = (req, res, next) => {
+export const authMiddleware = async (req, res, next) => {
     try {
 
         //Onbtengo token de la cabecera 
@@ -24,9 +25,21 @@ export const authMiddleware = (req, res, next) => {
         //Verifico y descodifico el token
         const decoded = jwt.verify(token, config.jwt.access.secret)
 
+        //Cargar usuario completo con company, role, status
+        const user = await User.findById(decoded.id)
+            .select('_id company role status')
+            .lean();
+
+        if (!user) {
+            throw AppError.unauthorized("Usuario no encontrado");
+        }
+
         //Agrego el usuario al req para usarlo en el controller
         req.user = {
-            id: decoded.id,
+            id: user._id.toString(),
+            company: user.company,
+            role: user.role,
+            status: user.status
         };
 
         next()
@@ -42,6 +55,6 @@ export const authMiddleware = (req, res, next) => {
             return next(AppError.unauthorized("Token expirado"));
         }
 
-        next(error);
+        next(e);
     }
 }

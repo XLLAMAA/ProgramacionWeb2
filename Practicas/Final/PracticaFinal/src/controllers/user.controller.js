@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import Company from "../models/Company.js";
 import AppError from "../utils/AppError.js";
+import config from '../config/index.js';
 import {
     registerSchema,
     loginSchema,

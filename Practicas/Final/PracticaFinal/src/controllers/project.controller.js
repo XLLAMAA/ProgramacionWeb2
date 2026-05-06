@@ -50,7 +50,7 @@ export const getProjectById = async (req, res, next) => {
             throw AppError.notFound("Proyecto no encontrado o eliminado")
         }
 
-        if (project.company.toString() !== req.user.company) {
+        if (project.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No perteneces a la compañia, con lo que no tienes permisos")
         }
 
@@ -180,7 +180,7 @@ export const restoreProject = async (req, res, next) => {
             throw AppError.badRequest("Este proyecto no está archivado")
         }
 
-        if (project.company.toString() !== req.user.company) {
+        if (project.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No tienes permisos en esta compañia")
         }
 

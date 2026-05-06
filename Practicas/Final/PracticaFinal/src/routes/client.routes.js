@@ -139,8 +139,6 @@ router.get('/', getClientes)
  *       404:
  *         description: Cliente no encontrado
  */
-router.get('/:id', getClientById)
-
 /**
  * @openapi
  * /api/client/archived:
@@ -167,6 +165,8 @@ router.get('/:id', getClientById)
  *                     $ref: '#/components/schemas/Client'
  */
 router.get('/archived', getArchivedClients)
+
+router.get('/:id', getClientById)
 
 /**
  * @openapi

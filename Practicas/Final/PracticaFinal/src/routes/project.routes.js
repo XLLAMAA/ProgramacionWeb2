@@ -143,8 +143,6 @@ router.get('/', getProjects)
  *       404:
  *         description: Proyecto no encontrado
  */
-router.get('/:id', getProjectById)
-
 /**
  * @openapi
  * /api/project/archived:
@@ -171,6 +169,8 @@ router.get('/:id', getProjectById)
  *                     $ref: '#/components/schemas/Project'
  */
 router.get('/archived', getArchivedProjects)
+
+router.get('/:id', getProjectById)
 
 /**
  * @openapi

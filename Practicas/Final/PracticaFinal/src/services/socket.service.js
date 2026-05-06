@@ -59,4 +59,16 @@ export const emitDeliveryNoteSigned = (company, deliveryNote) => {
     }
 };
 
+export const emitClientCreated = (company, data) => {
+    if (io) {
+        io.to(`company:${company}`).emit('client:created', data);
+    }
+};
+
+export const emitProjectCreated = (company, data) => {
+    if (io) {
+        io.to(`company:${company}`).emit('project:created', data);
+    }
+};
+
 export const getIO = () => io;

@@ -21,9 +21,9 @@ export const errorHandler = (err, req, res, next) => {
     //CASO 2: Error de validacion Zod
     if (err.name === "ZodError") {
         // Mapear errores de Zod a formato mas legible
-        const errors = err.errors.map((error) => ({
-            path: error.path.join("."),
-            message: error.message,
+        const errors = err.issues.map((issue) => ({
+            path: issue.path.join("."),
+            message: issue.message,
         }));
 
         return res.status(422).json({

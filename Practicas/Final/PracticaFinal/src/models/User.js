@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { z, ZodNumberFormat } from 'zod';
+import { z } from 'zod';
 
 const UserSchema = new mongoose.Schema({
     email: {
@@ -23,8 +23,9 @@ const UserSchema = new mongoose.Schema({
 
     nif: {
         type: String,
-        required: true,
-        unique: true
+        unique: true,
+        sparse: true,
+        default: null
     },
 
     role: {
@@ -51,16 +52,16 @@ const UserSchema = new mongoose.Schema({
     company: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Company',
-        required: true,
+        default: null,
         index: true
     },
 
     address: {
-        street: { type: String, required: true },
-        number: { type: String, required: true },
-        postal: { type: String, required: true },
-        city: { type: String, required: true },
-        province: { type: String, required: true },
+        street: { type: String, default: null },
+        number: { type: String, default: null },
+        postal: { type: String, default: null },
+        city: { type: String, default: null },
+        province: { type: String, default: null },
     },
 
     deleted: {

@@ -13,7 +13,8 @@ import {
     updateDeliveryNote,
     restoreDeliveryNote,
     deleteDeliveryNote,
-    signDeliveryNote
+    signDeliveryNote,
+    getPDFDeliveryNote
 } from '../controllers/deliverynote.controller.js';
 
 
@@ -162,8 +163,6 @@ router.get('/', getDeliveryNotes)
  *       404:
  *         description: Albarán no encontrado
  */
-router.get('/:id', getDeliveryNoteById)
-
 /**
  * @openapi
  * /api/deliverynote/archived:
@@ -190,6 +189,10 @@ router.get('/:id', getDeliveryNoteById)
  *                     $ref: '#/components/schemas/DeliveryNote'
  */
 router.get('/archived', getArchivedDeliveryNotes)
+
+router.get('/:id/pdf', getPDFDeliveryNote)
+
+router.get('/:id', getDeliveryNoteById)
 
 /**
  * @openapi

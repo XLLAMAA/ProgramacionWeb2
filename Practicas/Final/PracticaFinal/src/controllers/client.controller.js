@@ -50,7 +50,7 @@ export const getClientById = async (req, res, next) => {
             throw AppError.notFound("Cliente no encontrado o eliminado")
         }
 
-        if (client.company.toString() !== req.user.company) {
+        if (client.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No perteneces a la compañia, con lo que no tienes permisos")
         }
 
@@ -133,7 +133,7 @@ export const updateClient = async (req, res, next) => {
             throw AppError.notFound("No se ha encontrado el cliente buscado")
         }
 
-        if (client.company.toString() !== req.user.company) {
+        if (client.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No tienes permisos en esta compañia")
         }
 
@@ -175,7 +175,7 @@ export const restoreClient = async (req, res, next) => {
             throw AppError.badRequest("Este cliente no está archivado")
         }
 
-        if (client.company.toString() !== req.user.company) {
+        if (client.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No tienes permisos en esta compañia")
         }
 

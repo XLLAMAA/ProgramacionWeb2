@@ -53,7 +53,7 @@ export const getDeliveryNoteById = async (req, res, next) => {
             throw AppError.notFound("Albaran no encontrado o eliminado")
         }
 
-        if (delivery.company.toString() !== req.user.company) {
+        if (delivery.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No perteneces a la compañia, con lo que no tienes permisos")
         }
 
@@ -142,7 +142,7 @@ export const updateDeliveryNote = async (req, res, next) => {
             throw AppError.notFound("Delivery no encontrado")
         }
 
-        if (delivery.company.toString() !== req.user.company) {
+        if (delivery.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No tienes permisos en esta compañia")
         }
 
@@ -194,7 +194,7 @@ export const restoreDeliveryNote = async (req, res, next) => {
             throw AppError.badRequest("Este Albaran no esta archivado")
         }
 
-        if (delivery.company.toString() !== req.user.company) {
+        if (delivery.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No tienes permisos en esta compañia")
         }
 
@@ -219,7 +219,7 @@ export const deleteDeliveryNote = async (req, res, next) => {
             throw AppError.notFound("Albaran no encontrado o eliminado ya")
         }
 
-        if (delivery.company.toString() !== req.user.company) {
+        if (delivery.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No tienes permisos en esta compañia")
         }
 
@@ -253,7 +253,7 @@ export const signDeliveryNote = async (req, res, next) => {
             throw AppError.notFound("Albaran no encontrado")
         }
 
-        if (delivery.company.toString() !== req.user.company) {
+        if (delivery.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No tienes permisos en esta compañia")
         }
 
@@ -301,6 +301,46 @@ export const signDeliveryNote = async (req, res, next) => {
             message: "Albaran firmado correctamente",
             data: delivery
         });
+
+    } catch (e) {
+        next(e)
+    }
+}
+
+// Descargar PDF del albarán
+export const getPDFDeliveryNote = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        // Buscar y cargar con populate
+        const delivery = await Delivery.findById(id)
+            .populate('client')
+            .populate('project')
+            .populate('user');
+
+        if (!delivery || delivery.deleted) {
+            throw AppError.notFound("Albarán no encontrado o eliminado");
+        }
+
+        if (delivery.company.toString() !== req.user.company.toString()) {
+            throw AppError.forbidden("No tienes permisos en esta compañía");
+        }
+
+        if (!delivery.signed) {
+            throw AppError.badRequest("El albarán no ha sido firmado aún");
+        }
+
+        if (!delivery.pdfUrl) {
+            throw AppError.badRequest("El albarán no tiene PDF generado");
+        }
+
+        // Descargar desde Cloudinary y enviar
+        const axios = (await import('axios')).default;
+        const response = await axios.get(delivery.pdfUrl, { responseType: 'arraybuffer' });
+
+        res.contentType('application/pdf');
+        res.set('Content-Disposition', `attachment; filename="albaran-${delivery._id}.pdf"`);
+        res.send(response.data);
 
     } catch (e) {
         next(e)
