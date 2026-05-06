@@ -15,6 +15,7 @@ import DeliveryNote from "./models/DeliveryNote.js";
 
 // Importar servicio de notificaciones
 import "./services/notification.service.js";
+import { initializeSocket } from "./services/socket.service.js";
 
 // ========================================
 // INICIALIZACION DEL SERVIDOR
@@ -35,10 +36,14 @@ const startServer = async () => {
         console.log("  - Project");
         console.log("  - DeliveryNote");
 
-        // Iniciar servidor
+        //Iniciar servidor
         const server = app.listen(config.port, () => {
             console.log("🚀 Servidor ejecutándose en puerto", config.port);
             console.log(`🌐 http://localhost:${config.port}`);
+
+            //Iniciar socket
+            initializeSocket(server);
+            console.log("🔌 Socket.IO inicializado");
 
             if (config.isDevelopment) {
                 console.log("📝 Modo desarrollo activado");
