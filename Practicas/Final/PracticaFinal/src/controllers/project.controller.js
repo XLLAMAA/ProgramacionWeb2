@@ -1,5 +1,6 @@
 import Project from '../models/Project.js';
 import AppError from '../utils/AppError.js';
+import { emitProjectCreated } from '../services/socket.service.js';
 
 export const getProjects = async (req, res, next) => {
 
@@ -111,6 +112,9 @@ export const createProject = async (req, res, next) => {
         })
 
         await newProject.save()
+
+        // Emitir evento de proyecto creado
+        emitProjectCreated(req.user.company, newProject);
 
         res.status(201).json({ success: true, data: newProject })
 

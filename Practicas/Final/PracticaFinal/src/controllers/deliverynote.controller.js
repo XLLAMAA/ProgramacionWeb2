@@ -2,6 +2,7 @@ import Delivery from '../models/DeliveryNote.js';
 import AppError from '../utils/AppError.js';
 import { generateDeliveryNotePDF } from '../services/pdf.service.js';
 import { uploadSignature, uploadPDF } from '../services/storage.service.js';
+import { emitDeliveryNoteCreated, emitDeliveryNoteSigned } from '../services/socket.service.js';
 
 export const getDeliveryNotes = async (req, res, next) => {
 
@@ -49,7 +50,7 @@ export const getDeliveryNoteById = async (req, res, next) => {
 
         const delivery = await Delivery.findById(id)
         if (!delivery || delivery.deleted) {
-            throw AppError.notFound("Pedido no encontrado o eliminado")
+            throw AppError.notFound("Albaran no encontrado o eliminado")
         }
 
         if (delivery.company.toString() !== req.user.company) {
@@ -120,6 +121,9 @@ export const createDeliveryNote = async (req, res, next) => {
 
         await newDelivery.save()
 
+        //Emito el evento   
+        emitDeliveryNoteCreated(req.user.company, newDelivery)
+
         res.status(201).json({ success: true, data: newDelivery })
 
     } catch (e) {
@@ -144,7 +148,7 @@ export const updateDeliveryNote = async (req, res, next) => {
 
         //Compruebo si esta firmado 
         if (delivery.signed) {
-            throw AppError.badRequest("No puedes editar un pedido ya fimado")
+            throw AppError.badRequest("No puedes editar un Albaran ya fimado")
         }
 
         delivery.description = description || delivery.description
@@ -154,7 +158,7 @@ export const updateDeliveryNote = async (req, res, next) => {
 
         //No permito que se edite el  formato una vez creado
         if (format && format !== delivery.format) {
-            throw AppError.badRequest("No se puede cambiar el formato una vez creado el pedido")
+            throw AppError.badRequest("No se puede cambiar el formato una vez creado el Albaran")
         }
 
         //En funcion del formato escogido...
@@ -183,11 +187,11 @@ export const restoreDeliveryNote = async (req, res, next) => {
         const delivery = await Delivery.findById(id)
 
         if (!delivery) {
-            throw AppError.notFound("Pedido no encontrado")
+            throw AppError.notFound("Albaran no encontrado")
         }
 
         if (!delivery.deleted) {
-            throw AppError.badRequest("Este pedido no está archivado")
+            throw AppError.badRequest("Este Albaran no esta archivado")
         }
 
         if (delivery.company.toString() !== req.user.company) {
@@ -212,7 +216,7 @@ export const deleteDeliveryNote = async (req, res, next) => {
 
         const delivery = await Delivery.findById(id)
         if (!delivery || delivery.deleted) {
-            throw AppError.notFound("Pedido no encontrado o eliminado ya")
+            throw AppError.notFound("Albaran no encontrado o eliminado ya")
         }
 
         if (delivery.company.toString() !== req.user.company) {
@@ -227,7 +231,7 @@ export const deleteDeliveryNote = async (req, res, next) => {
             await Delivery.findByIdAndDelete(id)
         }
 
-        res.json({ success: true, message: "Pedido eliminado correctamente" })
+        res.json({ success: true, message: "Albaran eliminado correctamente" })
 
     } catch (e) {
         next(e)
@@ -246,7 +250,7 @@ export const signDeliveryNote = async (req, res, next) => {
         }
 
         if (!delivery) {
-            throw AppError.notFound("Pedido no encontrado")
+            throw AppError.notFound("Albaran no encontrado")
         }
 
         if (delivery.company.toString() !== req.user.company) {
@@ -254,7 +258,7 @@ export const signDeliveryNote = async (req, res, next) => {
         }
 
         if (delivery.signed) {
-            throw AppError.badRequest("No puedes editar un pedido ya fimado")
+            throw AppError.badRequest("No puedes editar un albaran ya fimado")
         }
 
         //Pasos de creacion, firma, subida, y  url
@@ -288,6 +292,9 @@ export const signDeliveryNote = async (req, res, next) => {
         delivery.pdfUrl = pdfResult.url;
 
         await delivery.save();
+
+        //Emito el evento
+        emitDeliveryNoteSigned(req.user.company, delivery);
 
         res.json({
             success: true,

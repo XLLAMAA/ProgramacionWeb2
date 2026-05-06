@@ -1,5 +1,6 @@
 import Client from '../models/Client.js';
 import AppError from '../utils/AppError.js';
+import { emitClientCreated } from '../services/socket.service.js';
 
 export const getClientes = async (req, res, next) => {
 
@@ -109,6 +110,9 @@ export const createClient = async (req, res, next) => {
         })
 
         await newClient.save()
+
+        // Emitir evento de cliente creado
+        emitClientCreated(req.user.company, newClient);
 
         res.status(201).json({ success: true, data: newClient })
 
