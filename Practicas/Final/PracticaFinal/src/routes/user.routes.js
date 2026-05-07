@@ -11,7 +11,7 @@ import {
     validatorEmail,
     personaDataInfo,
     personalCompany,
-    cambioContraseña,
+    cambioContrasena,
     refreshTokenSchema,
     inviteUserSchema,
 } from "../validators/user.validator.js";
@@ -397,7 +397,7 @@ router.post("/logout", authMiddleware, logout);
  *       401:
  *         description: Contraseña actual incorrecta
  */
-router.put("/password", authMiddleware, validate(cambioContraseña), cambioPassword);
+router.put("/password", authMiddleware, validate(cambioContrasena), cambioPassword);
 
 /**
  * @openapi

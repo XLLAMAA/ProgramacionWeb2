@@ -15,11 +15,6 @@ export const getProjects = async (req, res, next) => {
             deleted: false
         }
 
-        const filtro = {
-            company: req.user.company,
-            deleted: false
-        }
-
         if (name) filtro.name = { $regex: name, $options: 'i' }
         if (client) filtro.client = client
         if (active !== undefined) filtro.active = active === "true"
