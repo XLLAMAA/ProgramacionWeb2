@@ -193,14 +193,14 @@ export const deleteClient = async (req, res, next) => {
     try {
 
         const { id } = req.params
-        const { soft = true } = req.query
+        const soft = req.query.soft !== "false"
 
         const client = await Client.findById(id)
         if (!client || client.deleted) {
             throw AppError.notFound("Cliente no encontrado o eliminado ya")
         }
 
-        if (client.company.toString() !== req.user.company) {
+        if (client.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No tienes permisos en esta compañia")
         }
 

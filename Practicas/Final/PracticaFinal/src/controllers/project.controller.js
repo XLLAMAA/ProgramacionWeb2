@@ -6,8 +6,8 @@ export const getProjects = async (req, res, next) => {
 
     try {
 
-        const { page = 1, limit = 10, name, sort = "createdAt" } = req.query
-        const skip = (page - 1) * limit
+        const { page = 1, limit = 10, name, client, active, sort = "-createdAt" } = req.query
+        const skip = (parseInt(page) - 1) * parseInt(limit)
 
         //Contruyo el filtro y excluyo a los que estan eliminados
         const filtro = {
@@ -15,14 +15,28 @@ export const getProjects = async (req, res, next) => {
             deleted: false
         }
 
-        if (name) {
-            filtro.name = { $regex: name, $options: 'i' }
+        const filtro = {
+            company: req.user.company,
+            deleted: false
         }
 
-        const totalItems = await Project.countDocuments(filtro)
-        const totalPages = Math.ceil(totalItems / limit)
+        if (name) filtro.name = { $regex: name, $options: 'i' }
+        if (client) filtro.client = client
+        if (active !== undefined) filtro.active = active === "true"
 
-        const projects = await Project.find(filtro).sort({ [sort]: 1 }).skip(skip).limit(parseInt(limit))
+        const totalItems = await Project.countDocuments(filtro)
+        const totalPages = Math.ceil(totalItems / parseInt(limit))
+
+        //Soporta ?sort=-createdAt (descendente)
+        const sortObj = {}
+        if (sort.startsWith("-")) sortObj[sort.substring(1)] = -1
+        else sortObj[sort] = 1
+
+        const projects = await Project.find(filtro)
+            .populate('client', 'name cif')
+            .sort(sortObj)
+            .skip(skip)
+            .limit(parseInt(limit))
 
         res.json({
             success: true, data: projects,
@@ -33,13 +47,10 @@ export const getProjects = async (req, res, next) => {
                 limit: parseInt(limit)
             }
         })
-
     } catch (e) {
         next(e)
     }
-
 }
-
 export const getProjectById = async (req, res, next) => {
     try {
 
@@ -135,7 +146,7 @@ export const updateProject = async (req, res, next) => {
             throw AppError.notFound("No se ha encontrado el proyecto buscado")
         }
 
-        if (project.company.toString() !== req.user.company) {
+        if (project.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No tienes permisos en esta compañia")
         }
 
@@ -198,14 +209,14 @@ export const deleteProject = async (req, res, next) => {
     try {
 
         const { id } = req.params
-        const { soft = true } = req.query
+        const soft = req.query.soft !== "false"
 
         const project = await Project.findById(id)
         if (!project) {
             throw AppError.notFound("Proyecto no encontrado")
         }
 
-        if (project.company.toString() !== req.user.company) {
+        if (project.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No tienes permisos en esta compañia")
         }
 

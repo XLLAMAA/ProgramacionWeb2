@@ -17,13 +17,19 @@ export const initializeSocket = (server) => {
     });
 
     // 2️⃣ AUTENTICACIÓN con JWT
-    io.use((socket, next) => {
+    io.use(async (socket, next) => {
         try {
             const token = socket.handshake.auth.token;
             if (!token) return next(new Error('Token no proporcionado'));
 
-            const decoded = jwt.verify(token, config.jwt.access.secret);  //verifico jwt
-            socket.user = decoded; // { id, company }
+            const decoded = jwt.verify(token, config.jwt.access.secret);
+            const user = await User.findById(decoded.id).select('_id company');
+            if (!user) return next(new Error('Usuario no encontrado'));
+
+            socket.user = {
+                id: user._id.toString(),
+                company: user.company ? user.company.toString() : null
+            };
             next();
         } catch (error) {
             next(new Error('Token inválido'));
@@ -35,7 +41,9 @@ export const initializeSocket = (server) => {
         console.log(`✅ Usuario conectado: ${socket.user.id}`);
 
         // El usuario se une a su sala de empresa
-        socket.join(`company:${socket.user.company}`);
+        if (socket.user.company) {
+            socket.join(`company:${socket.user.company}`);
+        }
 
         // DESCONEXIÓN
         socket.on('disconnect', () => {
@@ -48,27 +56,19 @@ export const initializeSocket = (server) => {
 
 // 4️⃣ FUNCIONES para EMITIR eventos
 export const emitDeliveryNoteCreated = (company, deliveryNote) => {
-    if (io) {
-        io.to(`company:${company}`).emit('deliverynote:created', deliveryNote);
-    }
+    if (io && company) io.to(`company:${company}`).emit('deliverynote:new', deliveryNote);
 };
 
 export const emitDeliveryNoteSigned = (company, deliveryNote) => {
-    if (io) {
-        io.to(`company:${company}`).emit('deliverynote:signed', deliveryNote);
-    }
+    if (io && company) io.to(`company:${company}`).emit('deliverynote:signed', deliveryNote);
 };
 
 export const emitClientCreated = (company, data) => {
-    if (io) {
-        io.to(`company:${company}`).emit('client:created', data);
-    }
+    if (io && company) io.to(`company:${company}`).emit('client:new', data);
 };
 
 export const emitProjectCreated = (company, data) => {
-    if (io) {
-        io.to(`company:${company}`).emit('project:created', data);
-    }
-};
+    if (io && company) io.to(`company:${company}`).emit('project:new', data);
+}
 
 export const getIO = () => io;

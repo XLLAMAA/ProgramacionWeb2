@@ -5,27 +5,43 @@ import { uploadSignature, uploadPDF } from '../services/storage.service.js';
 import { emitDeliveryNoteCreated, emitDeliveryNoteSigned } from '../services/socket.service.js';
 
 export const getDeliveryNotes = async (req, res, next) => {
-
     try {
 
-        const { page = 1, limit = 10, format, sort = "workDate" } = req.query
-        const skip = (page - 1) * limit
+        const {
+            page = 1, limit = 10,
+            project, client, format, signed, from, to,
+            sort = "-workDate"
+        } = req.query
 
-        //Contruyo el filtro y expluyo a los que estan eiminados
+        const skip = (parseInt(page) - 1) * parseInt(limit)
+
         const filtro = {
             company: req.user.company,
             deleted: false
         }
-
-        if (format) {
-            filtro.format = format
+        if (project) filtro.project = project
+        if (client) filtro.client = client
+        if (format) filtro.format = format
+        if (signed !== undefined) filtro.signed = signed === "true"
+        if (from || to) {
+            filtro.workDate = {}
+            if (from) filtro.workDate.$gte = new Date(from)
+            if (to) filtro.workDate.$lte = new Date(to)
         }
 
         const totalItems = await Delivery.countDocuments(filtro)
-        const totalPages = Math.ceil(totalItems / limit)
+        const totalPages = Math.ceil(totalItems / parseInt(limit))
 
-        //-1 para que sea descendente
-        const deliveryNotes = await Delivery.find(filtro).sort({ [sort]: -1 }).skip(skip).limit(parseInt(limit))
+        const sortObj = {}
+        if (sort.startsWith("-")) sortObj[sort.substring(1)] = -1
+        else sortObj[sort] = 1
+
+        const deliveryNotes = await Delivery.find(filtro)
+            .populate('client', 'name cif')
+            .populate('project', 'name projectCode')
+            .sort(sortObj)
+            .skip(skip)
+            .limit(parseInt(limit))
 
         res.json({
             success: true, data: deliveryNotes,
@@ -36,11 +52,9 @@ export const getDeliveryNotes = async (req, res, next) => {
                 limit: parseInt(limit)
             }
         })
-
     } catch (e) {
         next(e)
     }
-
 }
 
 export const getDeliveryNoteById = async (req, res, next) => {
@@ -49,6 +63,10 @@ export const getDeliveryNoteById = async (req, res, next) => {
         const { id } = req.params
 
         const delivery = await Delivery.findById(id)
+            .populate('user', 'email name lastName')
+            .populate('client')
+            .populate('project')
+
         if (!delivery || delivery.deleted) {
             throw AppError.notFound("Albaran no encontrado o eliminado")
         }
@@ -212,7 +230,7 @@ export const deleteDeliveryNote = async (req, res, next) => {
     try {
 
         const { id } = req.params
-        const { soft = true } = req.query
+        const soft = req.query.soft !== "false"
 
         const delivery = await Delivery.findById(id)
         if (!delivery || delivery.deleted) {
@@ -221,6 +239,10 @@ export const deleteDeliveryNote = async (req, res, next) => {
 
         if (delivery.company.toString() !== req.user.company.toString()) {
             throw AppError.forbidden("No tienes permisos en esta compañia")
+        }
+
+        if (delivery.signed) {
+            throw AppError.badRequest("No puedes borrar un albaran firmado")
         }
 
         //Opciones de borrado: 1. Maracar como eliminado 2. Borrar completamente
@@ -244,6 +266,9 @@ export const signDeliveryNote = async (req, res, next) => {
         const { id } = req.params
         const signFile = req.file
         const delivery = await Delivery.findById(id)
+            .populate('user', 'email name lastName')
+            .populate('client')
+            .populate('project')
 
         if (!signFile) {
             throw AppError.badRequest("Debes proporcionar imagen de firma")

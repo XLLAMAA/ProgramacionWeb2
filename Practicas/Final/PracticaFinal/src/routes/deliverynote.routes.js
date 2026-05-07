@@ -190,14 +190,14 @@ router.get('/', getDeliveryNotes)
  */
 router.get('/archived', getArchivedDeliveryNotes)
 
-router.get('/:id/pdf', getPDFDeliveryNote)
+router.get('/pdf/:id', getPDFDeliveryNote)
 
 router.get('/:id', getDeliveryNoteById)
 
 /**
  * @openapi
  * /api/deliverynote/{id}/sign:
- *   post:
+ *   patch:
  *     tags:
  *       - Albaranes
  *     summary: Firmar albarán
@@ -242,7 +242,7 @@ router.get('/:id', getDeliveryNoteById)
  *       404:
  *         description: Albarán no encontrado
  */
-router.post('/:id/sign', upload.single('signature'), signDeliveryNote)
+router.patch('/:id/sign', upload.single('signature'), signDeliveryNote)
 
 /**
  * @openapi

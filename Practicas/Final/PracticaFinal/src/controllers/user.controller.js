@@ -8,7 +8,7 @@ import {
     validatorEmail,
     personaDataInfo,
     personalCompany,
-    cambioContraseña,
+    cambioContrasena,
     refreshTokenSchema,
     inviteUserSchema
 } from "../validators/user.validator.js";
