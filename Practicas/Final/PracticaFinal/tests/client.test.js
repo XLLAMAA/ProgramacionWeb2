@@ -31,7 +31,7 @@ describe('Client Endpoints', () => {
                 isFreelance: false
             });
 
-        companyId = companyRes.body.company._id;
+        companyId = companyRes.body.company.id;
     });
 
     describe('POST /api/client - Create Client', () => {

@@ -20,11 +20,11 @@ const CompanySchema = new mongoose.Schema({
     },
 
     address: {
-        street: { type: String, required: true },
-        number: { type: String, required: true },
-        postal: { type: String, required: true },
-        city: { type: String, required: true },
-        province: { type: String, required: true },
+        street: { type: String },
+        number: { type: String },
+        postal: { type: String },
+        city: { type: String },
+        province: { type: String },
     },
 
     logo: {
