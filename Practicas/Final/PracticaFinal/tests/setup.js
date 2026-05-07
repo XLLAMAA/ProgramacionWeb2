@@ -5,31 +5,31 @@ let mongoServer;
 
 // Hook de configuración global para Jest
 export const setupDB = async () => {
+    if (mongoServer) return;
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
 
     if (mongoose.connection.readyState === 0) {
-        await mongoose.connect(mongoUri, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+        await mongoose.connect(mongoUri);
     }
 };
 
+// Hook de teardown
 export const teardownDB = async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    if (mongoose.connection.readyState !== 0) {
+        await mongoose.disconnect();
+    }
+    if (mongoServer) {
+        await mongoServer.stop();
+        mongoServer = null;
+    }
 };
 
+// Limpiar colecciones entre tests
 export const clearDB = async () => {
+    if (mongoose.connection.readyState !== 1) return;
     const collections = mongoose.connection.collections;
     for (const key in collections) {
-        const collection = collections[key];
-        await collection.deleteMany({});
+        await collections[key].deleteMany({});
     }
 };
-
-// Jest Global Setup
-beforeAll(setupDB);
-afterAll(teardownDB);
-afterEach(clearDB);

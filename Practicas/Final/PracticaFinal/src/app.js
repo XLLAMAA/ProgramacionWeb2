@@ -1,9 +1,6 @@
 import express from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import mongoSanitize from "express-mongo-sanitize";
-
-
 
 //Importar config
 import config from "./config/index.js";
@@ -33,8 +30,23 @@ app.use(helmet());
 // Parser JSON
 app.use(express.json());
 
-// Sanitizar datos de MongoDB
-app.use(mongoSanitize());
+// Sanitización casera (compatible con Express 5)
+// Elimina cualquier clave que empiece por '$' o que contenga '.'
+const sanitize = (obj) => {
+    if (obj && typeof obj === "object") {
+        for (const key of Object.keys(obj)) {
+            if (key.startsWith("$") || key.includes(".")) {
+                delete obj[key];
+            } else {
+                sanitize(obj[key]);
+            }
+        }
+    }
+};
+app.use((req, res, next) => {
+    if (req.body) sanitize(req.body);
+    next();
+});
 
 // Rate limiting
 const limiter = rateLimit({
