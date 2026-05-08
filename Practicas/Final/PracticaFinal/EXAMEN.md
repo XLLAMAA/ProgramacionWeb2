@@ -39,6 +39,21 @@ tests para `GET /api/deliverynote/pdf/:id`.
   `signDeliveryNote`). Esto alinea el código con la documentación Swagger (que declaraba 403
   en los tres casos) y con las expectativas de los tests.
 
+**3. `src/app.js`**
+
+- El rate limiter (100 req / 15 min) se desactivó en `NODE_ENV=test`. Con múltiples `beforeEach`
+  encadenados (registro, empresa, cliente, proyecto, albarán) la suite consume ~20-25 peticiones
+  por test; en suites largas el límite se agotaba y las peticiones devolvían 429, no el código
+  esperado.
+
+**4. `src/models/User.js`**
+
+- Se eliminó `default: null` del campo `nif` (`unique: true, sparse: true`). MongoDB incluye en
+  el índice sparse los documentos cuyo campo está presente aunque sea `null`; con `default: null`
+  todos los usuarios tenían el campo en el documento y el segundo usuario lanzaba
+  `E11000 duplicate key error index: nif_1 dup key: { nif: null }`. Sin `default`, los usuarios
+  creados sin `nif` no tienen el campo en el documento y el índice sparse los ignora correctamente.
+
 ---
 
 ## Respuestas socráticas
@@ -148,3 +163,13 @@ de conexión detectable en el test.
    otra empresa (el controlador verifica la compañía antes del estado de firma). Ambos se
    resuelven sin necesidad de mockear axios porque el controlador retorna antes de llegar a esa
    llamada.
+
+7. **Fix del rate limiter.** Al ejecutar la suite completa, las peticiones de los múltiples
+   `beforeEach` agotaban el rate limiter. Se envuelve el middleware en
+   `if (config.env !== 'test')` para que solo opere en producción.
+
+8. **Fix del sparse index de `nif`.** Al intentar crear el segundo usuario dentro del test 403,
+   MongoDB devolvía `E11000 duplicate key error index: nif_1 dup key: { nif: null }`. La causa
+   es que `default: null` hacía que el campo existiera en todos los documentos con valor `null`,
+   y MongoDB no excluye los `null` del índice sparse. Se eliminó el default para que el campo
+   esté verdaderamente ausente en los documentos sin NIF.
