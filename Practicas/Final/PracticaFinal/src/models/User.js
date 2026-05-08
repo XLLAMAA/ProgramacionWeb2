@@ -24,8 +24,7 @@ const UserSchema = new mongoose.Schema({
     nif: {
         type: String,
         unique: true,
-        sparse: true,
-        default: null
+        sparse: true
     },
 
     role: {

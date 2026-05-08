@@ -48,13 +48,15 @@ app.use((req, res, next) => {
     next();
 });
 
-// Rate limiting
-const limiter = rateLimit({
-    windowMs: config.rateLimit.windowMs,
-    max: config.rateLimit.maxRequests,
-    message: "Demasiadas solicitudes, por favor intenta mas tarde",
-});
-app.use(limiter);
+// Rate limiting (desactivado en test para no bloquear las suites)
+if (config.env !== 'test') {
+    const limiter = rateLimit({
+        windowMs: config.rateLimit.windowMs,
+        max: config.rateLimit.maxRequests,
+        message: "Demasiadas solicitudes, por favor intenta mas tarde",
+    });
+    app.use(limiter);
+}
 
 // Servir archivos estaticos (uploads)
 app.use("/uploads", express.static("uploads"));
