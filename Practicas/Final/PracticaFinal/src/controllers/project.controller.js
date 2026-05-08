@@ -1,4 +1,6 @@
 import Project from '../models/Project.js';
+import Client from '../models/Client.js';
+import mongoose from 'mongoose';
 import AppError from '../utils/AppError.js';
 import { emitProjectCreated } from '../services/socket.service.js';
 
@@ -104,6 +106,19 @@ export const createProject = async (req, res, next) => {
 
         const { name, projectCode, client, email, notes, active, address } = req.body;
         const userId = req.user.id
+
+        if (!mongoose.Types.ObjectId.isValid(client)) {
+            throw AppError.badRequest("El cliente proporcionado no es válido")
+        }
+        const clientExists = await Client.findById(client)
+        if (!clientExists || clientExists.deleted) {
+            throw AppError.badRequest("El cliente no existe")
+        }
+
+        const exists = await Project.findOne({ projectCode, company: req.user.company })
+        if (exists) {
+            throw AppError.conflict("Este código de proyecto ya existe")
+        }
 
         const newProject = new Project({
             user: userId,

@@ -99,6 +99,11 @@ export const createClient = async (req, res, next) => {
         const { name, cif, email, phone, address } = req.body;
         const userId = req.user.id
 
+        const exists = await Client.findOne({ cif, company: req.user.company, deleted: false })
+        if (exists) {
+            throw AppError.conflict("Ya existe un cliente con ese CIF en la empresa")
+        }
+
         const newClient = new Client({
             user: userId,
             company: req.user.company,
