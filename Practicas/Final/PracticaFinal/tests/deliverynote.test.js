@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import request from 'supertest';
 import { setupDB, teardownDB, clearDB } from './setup.js';
 
@@ -77,7 +78,14 @@ describe('DeliveryNote Endpoints', () => {
             .send({
                 name: 'Client for Delivery',
                 cif: `B${Date.now()}`,
-                email: 'client@delivery.com'
+                email: 'client@delivery.com',
+                address: {
+                    street: 'Calle Test',
+                    number: '1',
+                    postal: '28001',
+                    city: 'Madrid',
+                    province: 'Madrid'
+                }
             });
 
         clientId = clientRes.body.data._id;
@@ -89,7 +97,14 @@ describe('DeliveryNote Endpoints', () => {
                 name: 'Project for Delivery',
                 projectCode: `PROJ-DEL-${Date.now()}`,
                 client: clientId,
-                email: 'project@delivery.com'
+                email: 'project@delivery.com',
+                address: {
+                    street: 'Calle Proyecto',
+                    number: '2',
+                    postal: '28002',
+                    city: 'Madrid',
+                    province: 'Madrid'
+                }
             });
 
         projectId = projectRes.body.data._id;
