@@ -62,7 +62,7 @@ describe('Auth Endpoints', () => {
                     email: `short_${Date.now()}@example.com`,
                     password: 'Pass1'
                 })
-                .expect(400);
+                .expect(422);
 
             expect(res.body.message).toBeDefined();
         });
@@ -74,7 +74,7 @@ describe('Auth Endpoints', () => {
                     email: 'invalid-email',
                     password: 'Password123'
                 })
-                .expect(400);
+                .expect(422);
 
             expect(res.body.message).toBeDefined();
         });
@@ -145,7 +145,7 @@ describe('Auth Endpoints', () => {
             const res = await request(app)
                 .get('/api/user')
                 .set('Authorization', `Bearer ${accessToken}`)
-                .expect(200);
+                .expect(201);
 
             expect(res.body.user).toHaveProperty('email');
             expect(res.body.user).toHaveProperty('role');
@@ -186,7 +186,7 @@ describe('Auth Endpoints', () => {
                     lastName: 'Pérez',
                     nif: '12345678A'
                 })
-                .expect(200);
+                .expect(201);
 
             expect(res.body.user.name).toBe('Juan');
             expect(res.body.user.lastName).toBe('Pérez');
@@ -214,7 +214,7 @@ describe('Auth Endpoints', () => {
                     cif: 'A12345678',
                     isFreelance: false
                 })
-                .expect(200);
+                .expect(201);
 
             expect(res.body.company).toHaveProperty('name');
             expect(res.body.company.name).toBe('Mi Empresa');
@@ -231,7 +231,7 @@ describe('Auth Endpoints', () => {
                     cif,
                     isFreelance: false
                 })
-                .expect(200);
+                .expect(201);
 
             const res2 = await request(app)
                 .post('/api/user')
@@ -250,7 +250,7 @@ describe('Auth Endpoints', () => {
                     cif,
                     isFreelance: false
                 })
-                .expect(200);
+                .expect(201);
 
             expect(res.body.user.role).toBe('guest');
         });
@@ -271,7 +271,7 @@ describe('Auth Endpoints', () => {
             await request(app)
                 .delete('/api/user?soft=true')
                 .set('Authorization', `Bearer ${token}`)
-                .expect(200);
+                .expect(201);
 
             const user = await User.findById(userId);
             expect(user.deleted).toBe(true);

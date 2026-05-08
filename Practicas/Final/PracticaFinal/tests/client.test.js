@@ -80,7 +80,10 @@ describe('Client Endpoints', () => {
                 .send({
                     name: 'Cliente 1',
                     cif,
-                    email: 'cliente1@test.com'
+                    email: 'cliente1@test.com',
+                    address: {
+                        street: 'Calle Test', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                    }
                 })
                 .expect(201);
 
@@ -90,7 +93,10 @@ describe('Client Endpoints', () => {
                 .send({
                     name: 'Cliente 2',
                     cif,
-                    email: 'cliente2@test.com'
+                    email: 'cliente2@test.com',
+                    address: {
+                        street: 'Calle Test', number: '2', postal: '28002', city: 'Madrid', province: 'Madrid'
+                    }
                 })
                 .expect(409);
 
@@ -106,7 +112,10 @@ describe('Client Endpoints', () => {
                 .send({
                     name: 'Cliente 1',
                     cif: 'D11111111',
-                    email: 'cliente1@test.com'
+                    email: 'cliente1@test.com',
+                    address: {
+                        street: 'Calle 1', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                    }
                 });
 
             await request(app)
@@ -115,7 +124,10 @@ describe('Client Endpoints', () => {
                 .send({
                     name: 'Cliente 2',
                     cif: 'D22222222',
-                    email: 'cliente2@test.com'
+                    email: 'cliente2@test.com',
+                    address: {
+                        street: 'Calle 2', number: '2', postal: '28002', city: 'Madrid', province: 'Madrid'
+                    }
                 });
         });
 
@@ -150,7 +162,10 @@ describe('Client Endpoints', () => {
                 .send({
                     name: 'Cliente Individual',
                     cif: 'E12345678',
-                    email: 'individual@test.com'
+                    email: 'individual@test.com',
+                    address: {
+                        street: 'Calle Ind', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                    }
                 });
 
             clientId = res.body.data._id;
@@ -182,7 +197,10 @@ describe('Client Endpoints', () => {
                 .send({
                     name: 'Cliente a Actualizar',
                     cif: 'F12345678',
-                    email: 'update@test.com'
+                    email: 'update@test.com',
+                    address: {
+                        street: 'Calle Upd', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                    }
                 });
 
             clientId = res.body.data._id;
@@ -211,7 +229,10 @@ describe('Client Endpoints', () => {
                 .send({
                     name: 'Cliente a Eliminar',
                     cif: 'G12345678',
-                    email: 'delete@test.com'
+                    email: 'delete@test.com',
+                    address: {
+                        street: 'Calle Del', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                    }
                 });
 
             clientId = res.body.data._id;
@@ -236,7 +257,10 @@ describe('Client Endpoints', () => {
                 .send({
                     name: 'Cliente Archivable',
                     cif: 'H12345678',
-                    email: 'archive@test.com'
+                    email: 'archive@test.com',
+                    address: {
+                        street: 'Calle Arch', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                    }
                 });
 
             clientId = res.body.data._id;
@@ -264,7 +288,10 @@ describe('Client Endpoints', () => {
                 .send({
                     name: 'Cliente a Restaurar',
                     cif: 'I12345678',
-                    email: 'restore@test.com'
+                    email: 'restore@test.com',
+                    address: {
+                        street: 'Calle Res', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                    }
                 });
 
             clientId = res.body.data._id;

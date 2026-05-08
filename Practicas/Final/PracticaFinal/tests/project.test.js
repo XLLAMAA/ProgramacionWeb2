@@ -41,7 +41,10 @@ describe('Project Endpoints', () => {
             .send({
                 name: 'Client for Project',
                 cif: `B${Date.now()}`,
-                email: 'client@test.com'
+                email: 'client@test.com',
+                address: {
+                    street: 'Calle Cli', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                }
             });
 
         clientId = clientRes.body.data._id;
@@ -95,7 +98,10 @@ describe('Project Endpoints', () => {
                     name: 'Proyecto 1',
                     projectCode: code,
                     client: clientId,
-                    email: 'project1@test.com'
+                    email: 'project1@test.com',
+                    address: {
+                        street: 'C1', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                    }
                 })
                 .expect(201);
 
@@ -106,7 +112,10 @@ describe('Project Endpoints', () => {
                     name: 'Proyecto 2',
                     projectCode: code,
                     client: clientId,
-                    email: 'project2@test.com'
+                    email: 'project2@test.com',
+                    address: {
+                        street: 'C2', number: '2', postal: '28002', city: 'Madrid', province: 'Madrid'
+                    }
                 })
                 .expect(409);
 
@@ -123,7 +132,10 @@ describe('Project Endpoints', () => {
                     name: 'Proyecto 1',
                     projectCode: `PROJ1-${Date.now()}`,
                     client: clientId,
-                    email: 'proj1@test.com'
+                    email: 'proj1@test.com',
+                    address: {
+                        street: 'C1', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                    }
                 });
 
             await request(app)
@@ -133,7 +145,10 @@ describe('Project Endpoints', () => {
                     name: 'Proyecto 2',
                     projectCode: `PROJ2-${Date.now()}`,
                     client: clientId,
-                    email: 'proj2@test.com'
+                    email: 'proj2@test.com',
+                    address: {
+                        street: 'C2', number: '2', postal: '28002', city: 'Madrid', province: 'Madrid'
+                    }
                 });
         });
 
@@ -175,7 +190,10 @@ describe('Project Endpoints', () => {
                     name: 'Proyecto Individual',
                     projectCode: `PROJ-IND-${Date.now()}`,
                     client: clientId,
-                    email: 'individual@test.com'
+                    email: 'individual@test.com',
+                    address: {
+                        street: 'CI', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                    }
                 });
 
             projectId = res.body.data._id;
@@ -207,7 +225,10 @@ describe('Project Endpoints', () => {
                     name: 'Proyecto a Actualizar',
                     projectCode: `PROJ-UPD-${Date.now()}`,
                     client: clientId,
-                    email: 'update@test.com'
+                    email: 'update@test.com',
+                    address: {
+                        street: 'CU', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                    }
                 });
 
             projectId = res.body.data._id;
@@ -238,7 +259,10 @@ describe('Project Endpoints', () => {
                     name: 'Proyecto a Eliminar',
                     projectCode: `PROJ-DEL-${Date.now()}`,
                     client: clientId,
-                    email: 'delete@test.com'
+                    email: 'delete@test.com',
+                    address: {
+                        street: 'CD', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                    }
                 });
 
             projectId = res.body.data._id;
@@ -264,7 +288,10 @@ describe('Project Endpoints', () => {
                     name: 'Proyecto a Restaurar',
                     projectCode: `PROJ-RES-${Date.now()}`,
                     client: clientId,
-                    email: 'restore@test.com'
+                    email: 'restore@test.com',
+                    address: {
+                        street: 'CR', number: '1', postal: '28001', city: 'Madrid', province: 'Madrid'
+                    }
                 });
 
             projectId = res.body.data._id;
