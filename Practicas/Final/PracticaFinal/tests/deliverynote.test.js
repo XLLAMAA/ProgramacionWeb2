@@ -1,9 +1,36 @@
 import request from 'supertest';
-import app from '../src/app.js';
-import DeliveryNote from '../src/models/DeliveryNote.js';
-import Client from '../src/models/Client.js';
-import Project from '../src/models/Project.js';
 import { setupDB, teardownDB, clearDB } from './setup.js';
+
+// Mock de storage.service.js ANTES de cualquier import dinámico que lo cargue transitivamente.
+// Sin esto, uploadSignature y uploadPDF llaman a Cloudinary real en CI (sin credenciales → fallo no determinista).
+jest.unstable_mockModule('../src/services/storage.service.js', () => ({
+    uploadSignature: jest.fn().mockResolvedValue({
+        url: 'https://res.cloudinary.com/fake/bildyapp/signatures/sig.webp',
+        publicId: 'bildyapp/signatures/fake-sig-id',
+        size: 1024
+    }),
+    uploadPDF: jest.fn().mockResolvedValue({
+        url: 'https://res.cloudinary.com/fake/bildyapp/pdfs/note.pdf',
+        publicId: 'bildyapp/pdfs/fake-pdf-id',
+        size: 4096
+    }),
+    optimizeImage: jest.fn().mockImplementation(async (buf) => buf),
+    deleteFromCloudinary: jest.fn().mockResolvedValue({ result: 'ok' }),
+    getCloudinaryUrl: jest.fn().mockReturnValue('https://res.cloudinary.com/fake/url'),
+    uploadBatch: jest.fn().mockResolvedValue([]),
+    default: {
+        uploadSignature: jest.fn(),
+        uploadPDF: jest.fn(),
+        optimizeImage: jest.fn(),
+        deleteFromCloudinary: jest.fn(),
+        getCloudinaryUrl: jest.fn(),
+        uploadBatch: jest.fn()
+    }
+}));
+
+// Se declaran aquí y se asignan en beforeAll para que el mock esté activo al cargar app
+let app;
+let DeliveryNote;
 
 describe('DeliveryNote Endpoints', () => {
     let accessToken = '';
@@ -12,7 +39,14 @@ describe('DeliveryNote Endpoints', () => {
     let projectId = '';
     let deliveryNoteId = '';
 
-    beforeAll(setupDB);
+    beforeAll(async () => {
+        await setupDB();
+        const appModule = await import('../src/app.js');
+        app = appModule.default;
+        const dnModule = await import('../src/models/DeliveryNote.js');
+        DeliveryNote = dnModule.default;
+    });
+
     afterAll(teardownDB);
     afterEach(clearDB);
 
@@ -265,8 +299,9 @@ describe('DeliveryNote Endpoints', () => {
         });
 
         it('debería rechazar actualización de albarán firmado', async () => {
+            // La ruta de firma es PATCH — ver deliverynote.routes.js línea 245
             await request(app)
-                .post(`/api/deliverynote/${deliveryNoteId}/sign`)
+                .patch(`/api/deliverynote/${deliveryNoteId}/sign`)
                 .set('Authorization', `Bearer ${accessToken}`)
                 .attach('signature', Buffer.from('fake image'), 'signature.png')
                 .expect(200);
@@ -314,7 +349,7 @@ describe('DeliveryNote Endpoints', () => {
 
         it('debería rechazar eliminación de albarán firmado', async () => {
             await request(app)
-                .post(`/api/deliverynote/${deliveryNoteId}/sign`)
+                .patch(`/api/deliverynote/${deliveryNoteId}/sign`)
                 .set('Authorization', `Bearer ${accessToken}`)
                 .attach('signature', Buffer.from('fake image'), 'signature.png')
                 .expect(200);
@@ -354,6 +389,59 @@ describe('DeliveryNote Endpoints', () => {
                 .expect(200);
 
             expect(res.body.data).toBeInstanceOf(Array);
+        });
+    });
+
+    describe('GET /api/deliverynote/pdf/:id - Download PDF', () => {
+        beforeEach(async () => {
+            const res = await request(app)
+                .post('/api/deliverynote')
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    format: 'hours',
+                    description: 'Albarán para PDF',
+                    workDate: new Date().toISOString(),
+                    hours: 8,
+                    project: projectId,
+                    client: clientId
+                });
+
+            deliveryNoteId = res.body.data._id;
+        });
+
+        it('debería devolver 400 si el albarán no está firmado', async () => {
+            const res = await request(app)
+                .get(`/api/deliverynote/pdf/${deliveryNoteId}`)
+                .set('Authorization', `Bearer ${accessToken}`)
+                .expect(400);
+
+            expect(res.body.message).toBeDefined();
+        });
+
+        it('debería devolver 403 si el albarán pertenece a otra empresa', async () => {
+            // Segundo usuario con empresa distinta intenta acceder al albarán del primero
+            const otherUserRes = await request(app)
+                .post('/api/user')
+                .send({
+                    email: `otherpdf_${Date.now()}@example.com`,
+                    password: 'Password123'
+                });
+
+            const otherToken = otherUserRes.body.accessToken;
+
+            await request(app)
+                .patch('/api/user/company')
+                .set('Authorization', `Bearer ${otherToken}`)
+                .send({
+                    name: 'Other Company PDF',
+                    cif: `Z${Date.now()}`,
+                    isFreelance: false
+                });
+
+            await request(app)
+                .get(`/api/deliverynote/pdf/${deliveryNoteId}`)
+                .set('Authorization', `Bearer ${otherToken}`)
+                .expect(403);
         });
     });
 });

@@ -164,9 +164,9 @@ export const updateDeliveryNote = async (req, res, next) => {
             throw AppError.forbidden("No tienes permisos en esta compañia")
         }
 
-        //Compruebo si esta firmado 
+        //Compruebo si esta firmado
         if (delivery.signed) {
-            throw AppError.badRequest("No puedes editar un Albaran ya fimado")
+            throw AppError.forbidden("No puedes editar un albarán ya firmado")
         }
 
         delivery.description = description || delivery.description
@@ -242,7 +242,7 @@ export const deleteDeliveryNote = async (req, res, next) => {
         }
 
         if (delivery.signed) {
-            throw AppError.badRequest("No puedes borrar un albaran firmado")
+            throw AppError.forbidden("No puedes borrar un albarán firmado")
         }
 
         //Opciones de borrado: 1. Maracar como eliminado 2. Borrar completamente
@@ -283,7 +283,7 @@ export const signDeliveryNote = async (req, res, next) => {
         }
 
         if (delivery.signed) {
-            throw AppError.badRequest("No puedes editar un albaran ya fimado")
+            throw AppError.forbidden("No puedes editar un albarán ya firmado")
         }
 
         //Pasos de creacion, firma, subida, y  url
