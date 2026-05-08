@@ -54,6 +54,37 @@ tests para `GET /api/deliverynote/pdf/:id`.
   `E11000 duplicate key error index: nif_1 dup key: { nif: null }`. Sin `default`, los usuarios
   creados sin `nif` no tienen el campo en el documento y el índice sparse los ignora correctamente.
 
+**5. `src/models/Client.js`**
+
+- Se añadió `sparse: true` al campo `phone` (`unique: true`). Mismo patrón que el bug de `nif`:
+  sin `sparse`, varios clientes sin teléfono colisionaban en el índice (`phone: null` duplicado).
+
+**6. `src/controllers/client.controller.js`**
+
+- Se añadió en `createClient` una comprobación previa: `Client.findOne({ cif, company, deleted: false })`.
+  Si existe, se lanza `AppError.conflict` (409). Antes el controlador insertaba sin validar y
+  permitía CIF duplicados en la misma empresa.
+
+**7. `src/controllers/project.controller.js`**
+
+- Se añadió en `createProject` validación del cliente referenciado: si el ObjectId no es válido o
+  el cliente no existe / está eliminado, se lanza `AppError.badRequest` (400). También se valida
+  que el `projectCode` no exista ya en la empresa (409). Antes se insertaba sin verificar y se
+  podían crear proyectos con clientes inexistentes.
+
+**8. `tests/client.test.js` y `tests/project.test.js`**
+
+- Se añadió el bloque `address` (todos los subcampos: street, number, postal, city, province) en
+  todas las llamadas a `POST /api/client` y `POST /api/project` que faltaban. Sin él, Mongoose
+  rechazaba la inserción por `ValidationError` (campos requeridos por el modelo).
+
+**9. `tests/auth.test.js`**
+
+- Se alinearon los códigos esperados con el comportamiento real:
+  - `400` → `422` en errores de validación Zod (el `errorHandler` mapea `ZodError` a 422).
+  - `200` → `201` en `getUser`, `updatePersonalData`, `updateCompanyData` y `deleteUser`,
+    porque esos controladores responden con `res.status(201)`.
+
 ---
 
 ## Respuestas socráticas
@@ -173,3 +204,17 @@ de conexión detectable en el test.
    es que `default: null` hacía que el campo existiera en todos los documentos con valor `null`,
    y MongoDB no excluye los `null` del índice sparse. Se eliminó el default para que el campo
    esté verdaderamente ausente en los documentos sin NIF.
+
+9. **Extensión a la suite completa.** El criterio "`npm test` pasa al 100%" obligó a revisar
+   también `auth.test.js`, `client.test.js` y `project.test.js`. Los fallos pre-existentes
+   tenían tres causas:
+   - `Client.phone` con `unique: true` sin `sparse: true` (mismo patrón que el bug de `nif`).
+   - `createClient` no comprobaba CIF duplicado dentro de la empresa, y `createProject` no
+     validaba la existencia del cliente referenciado: ambos hacían `save()` directo y los tests
+     que esperaban 409 / 400 acababan recibiendo 201 o 500.
+   - Los tests creaban `Client` y `Project` sin el bloque `address` que el modelo declara como
+     requerido. Y `auth.test.js` esperaba 400/200 donde el `errorHandler` y los controladores
+     devolvían 422/201 respectivamente.
+
+   Se aplicaron los fixes mínimos (validaciones en controladores + `sparse` en `phone` +
+   `address` y status codes en los tests) hasta llegar a 52/52.
